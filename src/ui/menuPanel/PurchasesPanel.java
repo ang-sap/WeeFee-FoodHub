@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
 
 public class PurchasesPanel extends javax.swing.JPanel {
@@ -22,6 +20,13 @@ public class PurchasesPanel extends javax.swing.JPanel {
         );
         tblPurchases.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblPurchases.setShowGrid(false);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblPurchases.getColumnCount(); i++) {
+            tblPurchases.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         loadPurchases();
     }
@@ -91,15 +96,15 @@ public class PurchasesPanel extends javax.swing.JPanel {
         jLabel1.setText("Purchase Orders");
 
         btnNewPurchase.setBackground(new java.awt.Color(231, 90, 14));
-        btnNewPurchase.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
+        btnNewPurchase.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnNewPurchase.setForeground(new java.awt.Color(255, 255, 255));
-        btnNewPurchase.setText("New Purchase");
+        btnNewPurchase.setText("Add Purchase");
         btnNewPurchase.setPreferredSize(new java.awt.Dimension(113, 30));
         btnNewPurchase.addActionListener(this::btnNewPurchaseActionPerformed);
 
-        btnVoid.setBackground(new java.awt.Color(231, 90, 14));
-        btnVoid.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        btnVoid.setForeground(new java.awt.Color(255, 255, 255));
+        btnVoid.setBackground(new java.awt.Color(254, 226, 226));
+        btnVoid.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnVoid.setForeground(new java.awt.Color(153, 27, 27));
         btnVoid.setText("Void");
         btnVoid.setPreferredSize(new java.awt.Dimension(113, 30));
         btnVoid.addActionListener(this::btnVoidActionPerformed);
@@ -111,22 +116,22 @@ public class PurchasesPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 532, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 583, Short.MAX_VALUE)
                 .addComponent(btnNewPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(22, 22, 22))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(24, 24, 24)
+                .addGap(21, 21, 21)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnNewPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btnNewPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         cardContainer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 980, 70));
@@ -146,11 +151,19 @@ public class PurchasesPanel extends javax.swing.JPanel {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
+        tblPurchases.setRowHeight(35);
         jScrollPane1.setViewportView(tblPurchases);
 
         cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 940, 500));
@@ -181,7 +194,7 @@ public class PurchasesPanel extends javax.swing.JPanel {
         String currentStatus = (String) tblPurchases.getValueAt(selectedRow, 4);
 
         if ("Pending".equalsIgnoreCase(currentStatus)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "This purchase is already marked as Pending/Cancelled.", "Already Voided", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "This purchase is already marked as Cancelled.", "Already Cancelled", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -198,7 +211,7 @@ public class PurchasesPanel extends javax.swing.JPanel {
             conn = database.DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            String sqlVoid = "UPDATE Purchases SET status = 'Cancelled' WHERE purchase_id = ?";
+            String sqlVoid = "UPDATE Purchases SET status = 'Pending' WHERE purchase_id = ?";
             try (java.sql.PreparedStatement pstmtVoid = conn.prepareStatement(sqlVoid)) {
                 pstmtVoid.setInt(1, purchaseId);
                 pstmtVoid.executeUpdate();

@@ -1,16 +1,31 @@
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+
 public class HomePanel extends javax.swing.JPanel {
 
     public HomePanel() {
         initComponents();
 
-        tblLowStock.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 12));
-        tblLowStock.getTableHeader().setBackground(new java.awt.Color(254, 226, 226));
-        tblLowStock.getTableHeader().setForeground(new java.awt.Color(153, 27, 27));
+        tblLowStock.getTableHeader().setFont(
+                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 11)
+        );
+        tblLowStock.getTableHeader().setBackground(
+                new java.awt.Color(245, 245, 245)
+        );
+        tblLowStock.getTableHeader().setForeground(
+                new java.awt.Color(80, 80, 80)
+        );
         tblLowStock.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblLowStock.setShowGrid(false);
-        tblLowStock.setRowHeight(35);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        for (int i = 0; i < tblLowStock.getColumnCount(); i++) {
+            tblLowStock.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         loadDashboardData();
     }
@@ -151,21 +166,21 @@ public class HomePanel extends javax.swing.JPanel {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel8)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3)
-                        .addComponent(lblTodayRevenue, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(54, Short.MAX_VALUE))
+                        .addComponent(jLabel9)
+                        .addGap(2, 2, 2)
+                        .addComponent(lblTodayRevenue, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addGap(25, 25, 25)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(lblTodayRevenue))
-                .addContainerGap(34, Short.MAX_VALUE))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
 
         cardContainer.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, -1, -1));
@@ -188,9 +203,7 @@ public class HomePanel extends javax.swing.JPanel {
                 .addGap(20, 20, 20)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel10)
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGap(0, 0, 0)
-                        .addComponent(lblLowStockCount, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(lblLowStockCount, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(77, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
@@ -229,15 +242,16 @@ public class HomePanel extends javax.swing.JPanel {
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(24, 24, 24)
+                .addGap(25, 25, 25)
                 .addComponent(jLabel13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblPendingCount)
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         cardContainer.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 100, -1, -1));
 
+        tblLowStock.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblLowStock.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
@@ -257,11 +271,12 @@ public class HomePanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        tblLowStock.setRowHeight(35);
         jScrollPane1.setViewportView(tblLowStock);
 
         cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 280, 920, 300));
 
-        jLabel12.setFont(new java.awt.Font("Geist Medium", 0, 18)); // NOI18N
+        jLabel12.setFont(new java.awt.Font("Georgia", 1, 18)); // NOI18N
         jLabel12.setText("Critical Stock Alerts");
         cardContainer.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, -1, -1));
 
@@ -279,15 +294,9 @@ public class HomePanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
@@ -295,8 +304,6 @@ public class HomePanel extends javax.swing.JPanel {
     private javax.swing.JLabel lblLowStockCount;
     private javax.swing.JLabel lblPendingCount;
     private javax.swing.JLabel lblTodayRevenue;
-    private javax.swing.JLabel lblTotalRevenue;
-    private javax.swing.JLabel lblTotalRevenue1;
     private javax.swing.JTable tblLowStock;
     // End of variables declaration//GEN-END:variables
 }

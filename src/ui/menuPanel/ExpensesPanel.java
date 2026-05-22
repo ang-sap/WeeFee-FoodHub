@@ -1,5 +1,7 @@
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
 
 public class ExpensesPanel extends javax.swing.JPanel {
@@ -7,12 +9,20 @@ public class ExpensesPanel extends javax.swing.JPanel {
     public ExpensesPanel() {
         initComponents();
 
-        tblExpenses.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 12));
+        tblExpenses.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10));
         tblExpenses.getTableHeader().setBackground(new java.awt.Color(245, 245, 245));
         tblExpenses.getTableHeader().setForeground(new java.awt.Color(80, 80, 80));
         tblExpenses.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblExpenses.setShowGrid(false);
         tblExpenses.setRowHeight(35);
+        
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblExpenses.getColumnCount(); i++) {
+            tblExpenses.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         loadExpenses();
     }
@@ -79,15 +89,17 @@ public class ExpensesPanel extends javax.swing.JPanel {
         jLabel1.setText("Operating Expenses");
 
         btnRecordExpense.setBackground(new java.awt.Color(231, 90, 14));
-        btnRecordExpense.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
+        btnRecordExpense.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnRecordExpense.setForeground(new java.awt.Color(255, 255, 255));
         btnRecordExpense.setText("Record Expense");
-        btnRecordExpense.setPreferredSize(new java.awt.Dimension(113, 30));
+        btnRecordExpense.setMaximumSize(new java.awt.Dimension(102, 24));
+        btnRecordExpense.setMinimumSize(new java.awt.Dimension(102, 24));
+        btnRecordExpense.setPreferredSize(new java.awt.Dimension(102, 24));
         btnRecordExpense.addActionListener(this::btnRecordExpenseActionPerformed);
 
-        btnVoidExpense.setBackground(new java.awt.Color(231, 90, 14));
-        btnVoidExpense.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        btnVoidExpense.setForeground(new java.awt.Color(255, 255, 255));
+        btnVoidExpense.setBackground(new java.awt.Color(254, 226, 226));
+        btnVoidExpense.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnVoidExpense.setForeground(new java.awt.Color(153, 27, 27));
         btnVoidExpense.setText("Void");
         btnVoidExpense.setPreferredSize(new java.awt.Dimension(113, 30));
         btnVoidExpense.addActionListener(this::btnVoidExpenseActionPerformed);
@@ -99,26 +111,28 @@ public class ExpensesPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 456, Short.MAX_VALUE)
-                .addComponent(btnRecordExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 536, Short.MAX_VALUE)
+                .addComponent(btnRecordExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnVoidExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(49, 49, 49))
+                .addComponent(btnVoidExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnRecordExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnVoidExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel1))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addGap(21, 21, 21)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnVoidExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnRecordExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 11, Short.MAX_VALUE)))
+                .addGap(13, 13, 13))
         );
 
         cardContainer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 980, 70));
 
+        tblExpenses.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblExpenses.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
@@ -133,11 +147,19 @@ public class ExpensesPanel extends javax.swing.JPanel {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
+        tblExpenses.setRowHeight(35);
         jScrollPane1.setViewportView(tblExpenses);
 
         cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 940, 500));

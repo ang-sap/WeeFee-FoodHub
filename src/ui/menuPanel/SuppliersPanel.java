@@ -1,12 +1,14 @@
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
 
 public class SuppliersPanel extends javax.swing.JPanel {
 
     public SuppliersPanel() {
         initComponents();
-        
+
         tblSuppliers.getTableHeader().setFont(
                 new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
         );
@@ -18,35 +20,46 @@ public class SuppliersPanel extends javax.swing.JPanel {
         );
         tblSuppliers.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblSuppliers.setShowGrid(false);
-        
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblSuppliers.getColumnCount(); i++) {
+            tblSuppliers.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
         loadSuppliers("");
     }
-    
-    public void loadSuppliers(String searchQuery) {
-        try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
-            
-            String sql = "SELECT supplier_id, supplier_name, contact_no, address " +
-                         "FROM Suppliers " +
-                         "WHERE is_archived = 0 AND (supplier_name LIKE ? OR address LIKE ?) " +
-                         "ORDER BY supplier_name ASC";
-                         
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-            String searchParam = "%" + searchQuery.trim() + "%";
-            pstmt.setString(1, searchParam);
-            pstmt.setString(2, searchParam);
-            
-            java.sql.ResultSet rs = pstmt.executeQuery();
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblSuppliers.getModel();
-            model.setRowCount(0); 
 
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("supplier_id"),
-                    rs.getString("supplier_name"),
-                    rs.getString("address"),      
-                    rs.getString("contact_no")
-                });
+    public void loadSuppliers(String searchQuery) {
+        boolean showArchived = chkShowArchived.isSelected();
+        int archiveFlag = showArchived ? 1 : 0;
+
+        String sql = "SELECT supplier_id, supplier_name, contact_no, address "
+                + "FROM Suppliers "
+                + "WHERE is_archived = ? AND (supplier_name LIKE ? OR address LIKE ?) "
+                + "ORDER BY supplier_name ASC";
+
+        try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String searchParam = "%" + searchQuery.trim() + "%";
+
+            pstmt.setInt(1, archiveFlag);
+            pstmt.setString(2, searchParam);
+            pstmt.setString(3, searchParam);
+
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblSuppliers.getModel();
+                model.setRowCount(0);
+
+                while (rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getInt("supplier_id"),
+                        rs.getString("supplier_name"),
+                        rs.getString("contact_no"),
+                        rs.getString("address")
+                    });
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,9 +81,10 @@ public class SuppliersPanel extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         btnAddSupplier = new javax.swing.JButton();
         btnEditSupplier = new javax.swing.JButton();
-        btnDeleteSupplier = new javax.swing.JButton();
+        btnArchive = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSuppliers = new javax.swing.JTable();
+        chkShowArchived = new javax.swing.JCheckBox();
 
         setBackground(new java.awt.Color(248, 250, 252));
         setLayout(new java.awt.GridBagLayout());
@@ -91,7 +105,7 @@ public class SuppliersPanel extends javax.swing.JPanel {
         btnAddSupplier.setBackground(new java.awt.Color(227, 83, 10));
         btnAddSupplier.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnAddSupplier.setForeground(new java.awt.Color(255, 255, 255));
-        btnAddSupplier.setText("Add");
+        btnAddSupplier.setText("Add Supplier");
         btnAddSupplier.setPreferredSize(new java.awt.Dimension(100, 35));
         btnAddSupplier.addActionListener(this::btnAddSupplierActionPerformed);
 
@@ -101,12 +115,12 @@ public class SuppliersPanel extends javax.swing.JPanel {
         btnEditSupplier.setPreferredSize(new java.awt.Dimension(100, 35));
         btnEditSupplier.addActionListener(this::btnEditSupplierActionPerformed);
 
-        btnDeleteSupplier.setBackground(new java.awt.Color(254, 226, 226));
-        btnDeleteSupplier.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
-        btnDeleteSupplier.setForeground(new java.awt.Color(153, 27, 27));
-        btnDeleteSupplier.setText("Archived");
-        btnDeleteSupplier.setPreferredSize(new java.awt.Dimension(100, 35));
-        btnDeleteSupplier.addActionListener(this::btnDeleteSupplierActionPerformed);
+        btnArchive.setBackground(new java.awt.Color(254, 226, 226));
+        btnArchive.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnArchive.setForeground(new java.awt.Color(153, 27, 27));
+        btnArchive.setText("Archived");
+        btnArchive.setPreferredSize(new java.awt.Dimension(100, 35));
+        btnArchive.addActionListener(this::btnArchiveActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -115,13 +129,13 @@ public class SuppliersPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 493, Short.MAX_VALUE)
-                .addComponent(btnAddSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 478, Short.MAX_VALUE)
+                .addComponent(btnAddSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnEditSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnDeleteSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50))
+                .addComponent(btnArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -131,12 +145,13 @@ public class SuppliersPanel extends javax.swing.JPanel {
                     .addComponent(btnAddSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(btnEditSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDeleteSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnArchive, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(13, Short.MAX_VALUE))
         );
 
         cardContainer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 980, 70));
 
+        tblSuppliers.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblSuppliers.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -163,9 +178,15 @@ public class SuppliersPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        tblSuppliers.setRowHeight(35);
         jScrollPane1.setViewportView(tblSuppliers);
 
-        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 940, 480));
+        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 940, 470));
+
+        chkShowArchived.setFont(new java.awt.Font("Geist SemiBold", 0, 10)); // NOI18N
+        chkShowArchived.setText("Show Archived");
+        chkShowArchived.addActionListener(this::chkShowArchivedActionPerformed);
+        cardContainer.add(chkShowArchived, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 100, -1));
 
         add(cardContainer, new java.awt.GridBagConstraints());
     }// </editor-fold>//GEN-END:initComponents
@@ -204,52 +225,71 @@ public class SuppliersPanel extends javax.swing.JPanel {
         loadSuppliers("");
     }//GEN-LAST:event_btnEditSupplierActionPerformed
 
-    private void btnDeleteSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteSupplierActionPerformed
+    private void btnArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArchiveActionPerformed
         int selectedRow = tblSuppliers.getSelectedRow();
-
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a supplier to archive.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a supplier first.");
             return;
         }
 
         int supplierId = (int) tblSuppliers.getValueAt(selectedRow, 0);
         String supplierName = (String) tblSuppliers.getValueAt(selectedRow, 1);
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
-                "Are you sure you want to archive '" + supplierName + "'?", 
-                "Confirm Archive", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+        boolean isArchivedView = chkShowArchived.isSelected();
+        String actionWord = isArchivedView ? "restore" : "archive";
+        String logAction = isArchivedView ? "RESTORE_SUPPLIER" : "ARCHIVE_SUPPLIER";
+        int newArchiveStatus = isArchivedView ? 0 : 1;
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to " + actionWord + " '" + supplierName + "'?",
+                "Confirm Action",
+                javax.swing.JOptionPane.YES_NO_OPTION);
 
         if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-            try {
-                java.sql.Connection conn = database.DBConnection.getConnection();
-                
-                String sql = "UPDATE Suppliers SET is_archived = 1 WHERE supplier_id = ?";
-                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setInt(1, supplierId);
-                pstmt.executeUpdate();
-                
-                String logSql = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'ARCHIVE_SUPPLIER', ?)";
-                java.sql.PreparedStatement logStmt = conn.prepareStatement(logSql);
-                logStmt.setInt(1, LoginPanel.loggedInUserId);
-                logStmt.setString(2, "Archived supplier: " + supplierName);
-                logStmt.executeUpdate();
+            try (java.sql.Connection conn = database.DBConnection.getConnection()) {
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Supplier successfully archived.");
-                loadSuppliers(""); 
-                
+                String sql = "UPDATE Suppliers SET is_archived = ? WHERE supplier_id = ?";
+                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setInt(1, newArchiveStatus);
+                    pstmt.setInt(2, supplierId);
+                    pstmt.executeUpdate();
+                }
+
+                String logSql = "{call sp_InsertAuditLog(?, ?, ?)}";
+                try (java.sql.CallableStatement cstmtLog = conn.prepareCall(logSql)) {
+                    cstmtLog.setInt(1, LoginPanel.loggedInUserId);
+                    cstmtLog.setString(2, logAction);
+                    cstmtLog.setString(3, actionWord.substring(0, 1).toUpperCase() + actionWord.substring(1) + "d Supplier ID: " + supplierId);
+                    cstmtLog.execute();
+                }
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Supplier " + actionWord + "d successfully.");
+
+                loadSuppliers("");
+
             } catch (Exception e) {
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Error processing request: " + e.getMessage());
             }
         }
-    }//GEN-LAST:event_btnDeleteSupplierActionPerformed
+    }//GEN-LAST:event_btnArchiveActionPerformed
+
+    private void chkShowArchivedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowArchivedActionPerformed
+        if (chkShowArchived.isSelected()) {
+            btnArchive.setText("Restore");
+        } else {
+            btnArchive.setText("Archive");
+        }
+        loadSuppliers("");
+    }//GEN-LAST:event_chkShowArchivedActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddSupplier;
-    private javax.swing.JButton btnDeleteSupplier;
+    private javax.swing.JButton btnArchive;
     private javax.swing.JButton btnEditSupplier;
     private javax.swing.JPanel cardContainer;
+    private javax.swing.JCheckBox chkShowArchived;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

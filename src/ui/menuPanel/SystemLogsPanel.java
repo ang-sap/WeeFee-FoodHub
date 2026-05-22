@@ -1,45 +1,63 @@
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+
 public class SystemLogsPanel extends javax.swing.JPanel {
 
     public SystemLogsPanel() {
         initComponents();
-        
+
+        txtSearchLogs.putClientProperty("JTextField.placeholderText", "Search by action, user, or details...");
         tblLogs.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 12));
         tblLogs.getTableHeader().setBackground(new java.awt.Color(245, 245, 245));
         tblLogs.getTableHeader().setForeground(new java.awt.Color(80, 80, 80));
         tblLogs.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblLogs.setShowGrid(false);
-        tblLogs.setRowHeight(30);
-        
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblLogs.getColumnCount(); i++) {
+            tblLogs.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
         txtSearchLogs.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { loadLogs(txtSearchLogs.getText()); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { loadLogs(txtSearchLogs.getText()); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { loadLogs(txtSearchLogs.getText()); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                loadLogs(txtSearchLogs.getText());
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                loadLogs(txtSearchLogs.getText());
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                loadLogs(txtSearchLogs.getText());
+            }
         });
 
         loadLogs("");
     }
-    
+
     public void loadLogs(String searchQuery) {
         try {
             java.sql.Connection conn = database.DBConnection.getConnection();
-            
-            String sql = "SELECT a.log_id, a.log_date, ISNULL(u.username, 'System') AS username, a.action, a.description " +
-                         "FROM AuditLogs a " +
-                         "LEFT JOIN Users u ON a.user_id = u.user_id " +
-                         "WHERE a.action LIKE ? OR a.description LIKE ? OR ISNULL(u.username, '') LIKE ? " +
-                         "ORDER BY a.log_date DESC";
-                         
+
+            String sql = "SELECT a.log_id, a.log_date, ISNULL(u.username, 'System') AS username, a.action, a.description "
+                    + "FROM AuditLogs a "
+                    + "LEFT JOIN Users u ON a.user_id = u.user_id "
+                    + "WHERE a.action LIKE ? OR a.description LIKE ? OR ISNULL(u.username, '') LIKE ? "
+                    + "ORDER BY a.log_date DESC";
+
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
             String searchParam = "%" + searchQuery.trim() + "%";
             pstmt.setString(1, searchParam);
             pstmt.setString(2, searchParam);
-            pstmt.setString(3, searchParam); 
-            
+            pstmt.setString(3, searchParam);
+
             java.sql.ResultSet rs = pstmt.executeQuery();
             javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblLogs.getModel();
-            model.setRowCount(0); 
+            model.setRowCount(0);
 
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a");
 
@@ -110,13 +128,16 @@ public class SystemLogsPanel extends javax.swing.JPanel {
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
+        txtSearchLogs.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtSearchLogs.addActionListener(this::txtSearchLogsActionPerformed);
-        jPanel1.add(txtSearchLogs, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 200, 30));
+        jPanel1.add(txtSearchLogs, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 250, 30));
 
+        btnSearch.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(this::btnSearchActionPerformed);
-        jPanel1.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 90, 100, 30));
+        jPanel1.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, 100, 30));
 
+        tblLogs.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblLogs.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
@@ -131,11 +152,19 @@ public class SystemLogsPanel extends javax.swing.JPanel {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
+        tblLogs.setRowHeight(35);
         jScrollPane1.setViewportView(tblLogs);
 
         jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 130, 920, 450));

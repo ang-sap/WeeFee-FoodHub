@@ -1,38 +1,84 @@
 package ui.dialogs;
 
-import com.formdev.flatlaf.FlatClientProperties;
+import javax.swing.*;
+import java.awt.*;
 import ui.menuPanel.POSPanel;
 
 public class ProductCard extends javax.swing.JPanel {
 
-    private int productId;
-    private String productName;
-    private double productPrice;
-    private POSPanel parentPOS;
+    private int id;
+    private String name;
+    private double price;
+    private POSPanel parentPanel;
 
-    public ProductCard(int id, String name, double price, POSPanel pos) {
+    public ProductCard(int id, String name, double price, String imagePath, POSPanel parentPanel) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.parentPanel = parentPanel;
+
         initComponents();
-        
-        jPanel2.putClientProperty(
-                FlatClientProperties.STYLE,
-                "arc:20;"
-                + "background:#FFFFFF;"
-                + "border:8,8,8,8,#E5E7EB;"
-        );
-        this.productId = id;
-        this.productName = name;
-        this.productPrice = price;
-        this.parentPOS = pos;
 
         lblProductName.setText(name);
         lblPrice.setText(String.format("%.2f", price));
 
-        this.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                parentPOS.addToCart(productId, productName, productPrice);
+        try { 
+            if (imagePath == null || imagePath.isEmpty()) {
+                imagePath = "/images/default.png";
             }
-        });
+            
+            java.net.URL imgURL = getClass().getResource(imagePath);
+            if (imgURL != null) {
+                ImageIcon originalIcon = new ImageIcon(imgURL);
+
+                Image scaledImage = originalIcon.getImage().getScaledInstance(156, 96, Image.SCALE_SMOOTH);
+
+                lblImage.setIcon(new ImageIcon(scaledImage));
+                lblImage.setText("");
+            } else {
+                lblImage.setText("No Image");
+            }
+
+            lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+            lblImage.setVerticalAlignment(SwingConstants.CENTER);
+
+            lblImage.setSize(156, 96);
+
+            lblImage.setLocation(2, 2);
+        } catch (Exception e) {
+            System.out.println("Could not load image: " + imagePath);
+        }
+        
+        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240), 1));
+
+        java.awt.event.MouseAdapter interactiveAdapter = new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                parentPanel.addToCart(id, name, price);
+            }
+
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                jPanel2.setLocation(0, -3); 
+                jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 163, 184), 2)); 
+                jPanel2.setBackground(new java.awt.Color(248, 250, 252)); 
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                jPanel2.setLocation(0, 0); 
+                jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240), 1)); 
+                jPanel2.setBackground(new java.awt.Color(255, 255, 255)); 
+            }
+        };
+
+        this.addMouseListener(interactiveAdapter);
+        jPanel2.addMouseListener(interactiveAdapter);
+        lblImage.addMouseListener(interactiveAdapter);
+        lblProductName.addMouseListener(interactiveAdapter);
+        lblPrice.addMouseListener(interactiveAdapter);
+        
+        this.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     }
 
     /**
@@ -45,10 +91,10 @@ public class ProductCard extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanel2 = new javax.swing.JPanel();
-        lblProductImage = new javax.swing.JPanel();
         lblProductName = new javax.swing.JLabel();
         Total = new javax.swing.JLabel();
         lblPrice = new javax.swing.JLabel();
+        lblImage = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setMaximumSize(new java.awt.Dimension(160, 180));
@@ -62,12 +108,6 @@ public class ProductCard extends javax.swing.JPanel {
         jPanel2.setPreferredSize(new java.awt.Dimension(160, 180));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblProductImage.setBackground(new java.awt.Color(230, 230, 230));
-        lblProductImage.setMaximumSize(new java.awt.Dimension(140, 100));
-        lblProductImage.setMinimumSize(new java.awt.Dimension(140, 100));
-        lblProductImage.setPreferredSize(new java.awt.Dimension(140, 100));
-        jPanel2.add(lblProductImage, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 160, 80));
-
         lblProductName.setFont(new java.awt.Font("Geist", 0, 14)); // NOI18N
         lblProductName.setText("Item Name");
         jPanel2.add(lblProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 80, -1));
@@ -79,16 +119,18 @@ public class ProductCard extends javax.swing.JPanel {
         lblPrice.setFont(new java.awt.Font("Georgia", 1, 18)); // NOI18N
         lblPrice.setText(" 0.00");
         jPanel2.add(lblPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, -1, 20));
+        jPanel2.add(lblImage, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 160, 80));
 
         add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
     }// </editor-fold>//GEN-END:initComponents
 
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Total;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel lblImage;
     private javax.swing.JLabel lblPrice;
-    private javax.swing.JPanel lblProductImage;
     private javax.swing.JLabel lblProductName;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,5 +1,7 @@
 package ui.menuPanel;
 
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
 
 public class TransactionsPanel extends javax.swing.JPanel {
@@ -20,6 +22,13 @@ public class TransactionsPanel extends javax.swing.JPanel {
         );
         tblTransactions.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblTransactions.setShowGrid(false);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblTransactions.getColumnCount(); i++) {
+            tblTransactions.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         txtSearchLogs.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
@@ -105,20 +114,23 @@ public class TransactionsPanel extends javax.swing.JPanel {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(226, 232, 240)));
+        jPanel2.setPreferredSize(new java.awt.Dimension(980, 70));
 
         jLabel1.setFont(new java.awt.Font("Georgia", 1, 20)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(15, 23, 42));
         jLabel1.setText("Sales History");
 
-        btnViewDetails.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
-        btnViewDetails.setText("View Receipt Details");
+        btnViewDetails.setBackground(new java.awt.Color(231, 90, 14));
+        btnViewDetails.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnViewDetails.setForeground(new java.awt.Color(255, 255, 255));
+        btnViewDetails.setText("View Details");
         btnViewDetails.setPreferredSize(new java.awt.Dimension(113, 30));
         btnViewDetails.addActionListener(this::btnViewDetailsActionPerformed);
 
-        btnVoidSale.setBackground(new java.awt.Color(255, 102, 102));
-        btnVoidSale.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
-        btnVoidSale.setForeground(new java.awt.Color(255, 255, 255));
-        btnVoidSale.setText("Void Transaction");
+        btnVoidSale.setBackground(new java.awt.Color(254, 226, 226));
+        btnVoidSale.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnVoidSale.setForeground(new java.awt.Color(153, 27, 27));
+        btnVoidSale.setText("Void");
         btnVoidSale.setPreferredSize(new java.awt.Dimension(113, 30));
         btnVoidSale.addActionListener(this::btnVoidSaleActionPerformed);
 
@@ -127,36 +139,38 @@ public class TransactionsPanel extends javax.swing.JPanel {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(23, 23, 23)
+                .addGap(19, 19, 19)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 487, Short.MAX_VALUE)
-                .addComponent(btnViewDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 620, Short.MAX_VALUE)
+                .addComponent(btnViewDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnVoidSale, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(56, 56, 56))
+                .addComponent(btnVoidSale, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(25, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnViewDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnVoidSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(21, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnViewDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnVoidSale, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addGap(20, 20, 20))
+                .addGap(13, 13, 13))
         );
 
-        cardContainer.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        cardContainer.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 980, -1));
 
+        txtSearchLogs.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtSearchLogs.setToolTipText("Search by Receipt ID or Cashier Name");
         txtSearchLogs.addActionListener(this::txtSearchLogsActionPerformed);
-        cardContainer.add(txtSearchLogs, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 260, 30));
+        cardContainer.add(txtSearchLogs, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 260, 30));
 
+        btnSearch.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(this::btnSearchActionPerformed);
-        cardContainer.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 90, 100, 30));
+        cardContainer.add(btnSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 90, 100, 30));
 
+        tblTransactions.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblTransactions.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
@@ -172,7 +186,7 @@ public class TransactionsPanel extends javax.swing.JPanel {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, true, true
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -183,9 +197,10 @@ public class TransactionsPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        tblTransactions.setRowHeight(35);
         jScrollPane1.setViewportView(tblTransactions);
 
-        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 130, 920, 450));
+        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 940, 460));
 
         add(cardContainer, new java.awt.GridBagConstraints());
     }// </editor-fold>//GEN-END:initComponents
@@ -207,59 +222,73 @@ public class TransactionsPanel extends javax.swing.JPanel {
         try {
             java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sqlHeader = "SELECT u.username, t.total_amount, t.transaction_date " +
-                               "FROM Transactions t INNER JOIN Users u ON t.user_id = u.user_id " +
-                               "WHERE t.transaction_id = ?";
+            String sqlHeader = "SELECT u.username, t.total_amount, t.cash_tendered, t.transaction_date "
+                    + "FROM Transactions t INNER JOIN Users u ON t.user_id = u.user_id "
+                    + "WHERE t.transaction_id = ?";
             java.sql.PreparedStatement pstmtHeader = conn.prepareStatement(sqlHeader);
             pstmtHeader.setInt(1, transactionId);
             java.sql.ResultSet rsHeader = pstmtHeader.executeQuery();
 
             String cashierName = "Unknown";
             double totalAmount = 0.0;
+            double cashReceived = 0.0;
             String date = "";
-            
+
             if (rsHeader.next()) {
                 cashierName = rsHeader.getString("username");
                 totalAmount = rsHeader.getDouble("total_amount");
-                date = new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a").format(rsHeader.getTimestamp("transaction_date"));
+                cashReceived = rsHeader.getDouble("cash_tendered");
+                date = new java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a").format(rsHeader.getTimestamp("transaction_date"));
             }
 
+            double change = cashReceived - totalAmount;
+            double vatableSales = totalAmount / 1.12;
+            double vatAmount = totalAmount - vatableSales;
+
             StringBuilder receipt = new StringBuilder();
-            
             receipt.append("==========================================\n");
-            receipt.append("              WEEFEE FOODHUB              \n");
-            receipt.append("           123 Culinary Avenue            \n");
-            receipt.append("           Manila, Philippines            \n");
-            receipt.append("==========================================\n");
-            receipt.append(String.format(" Receipt # : %d\n", transactionId));
-            receipt.append(String.format(" Date      : %s\n", date));
-            receipt.append(String.format(" Cashier   : %s\n", cashierName));
+            receipt.append("              WEEFEE FOODHUB\n");
+            receipt.append("        1878 Tayuman St. Sta. Cruz\n");
+            receipt.append("              Manila Philippines\n");
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-20s %-5s %-7s %-7s\n", "ITEM", "QTY", "PRICE", "TOTAL"));
+            receipt.append("              SALES INVOICE\n");
+            receipt.append("TIN: 123-456-789-000\n");
+            receipt.append("VAT REG TIN\n");
+            receipt.append("MIN: 24010123456789012\n");
+            receipt.append("==========================================\n");
+            receipt.append(String.format("Receipt No : %d\n", transactionId));
+            receipt.append(String.format("Date       : %s\n", date));
+            receipt.append(String.format("Cashier    : %s\n", cashierName));
+            receipt.append("------------------------------------------\n");
+            receipt.append(String.format("%-22s %-5s %11s\n", "ITEM", "QTY", "TOTAL"));
             receipt.append("------------------------------------------\n");
 
-            String sqlItems = "SELECT p.name, td.quantity, td.selling_price, (td.quantity * td.selling_price) AS subtotal " +
-                              "FROM Transaction_Details td " +
-                              "INNER JOIN Products p ON td.product_id = p.product_id " +
-                              "WHERE td.transaction_id = ?";
+            String sqlItems = "SELECT p.name, td.quantity, td.selling_price, (td.quantity * td.selling_price) AS subtotal "
+                    + "FROM Transaction_Details td "
+                    + "INNER JOIN Products p ON td.product_id = p.product_id "
+                    + "WHERE td.transaction_id = ?";
             java.sql.PreparedStatement pstmtItems = conn.prepareStatement(sqlItems);
             pstmtItems.setInt(1, transactionId);
             java.sql.ResultSet rsItems = pstmtItems.executeQuery();
 
             while (rsItems.next()) {
                 String rawName = rsItems.getString("name");
-                String itemName = rawName.length() > 18 ? rawName.substring(0, 15) + "..." : rawName;
+                String itemName = rawName.length() > 18 ? rawName.substring(0, 18) : rawName;
                 int qty = rsItems.getInt("quantity");
-                double price = rsItems.getDouble("selling_price");
                 double subtotal = rsItems.getDouble("subtotal");
 
-                receipt.append(String.format("%-20s %-5d %-7.2f %-7.2f\n", itemName, qty, price, subtotal));
+                receipt.append(String.format("%-22s %-5d   ₱%8.2f\n", itemName, qty, subtotal));
             }
 
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-33s %-7.2f\n", "GRAND TOTAL:", totalAmount));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "VATable Sales", vatableSales));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "VAT Amount", vatAmount));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "TOTAL", totalAmount));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "CASH", cashReceived));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "CHANGE", change));
             receipt.append("==========================================\n");
-            receipt.append("         Thank you for dining with us!    \n");
+            receipt.append("      THIS SERVES AS YOUR SALES INVOICE   \n");
+            receipt.append("            THANK YOU! COME AGAIN         \n");
             receipt.append("==========================================\n");
 
             javax.swing.JTextArea txtReceipt = new javax.swing.JTextArea(receipt.toString());

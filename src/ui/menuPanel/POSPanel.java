@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import database.DBConnection;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
 
 public class POSPanel extends javax.swing.JPanel {
@@ -14,13 +16,15 @@ public class POSPanel extends javax.swing.JPanel {
     public POSPanel() {
         initComponents();
 
-        menuGrid.setLayout(new java.awt.GridLayout(0, 3, 15, 15));
-        menuGrid.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 15, 10, 10));
+        menuGrid.setLayout(new java.awt.GridLayout(0, 3, 15, 2));
+        menuGrid.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 25, 5, 10));
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        txtSearch.putClientProperty("JTextField.placeholderText", "ex. Siomai");
 
         javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
-                new String[]{"Item", "➖", "Qty", "➕", "Total", "🗑", "ID"}
+                new String[]{"Item", "", "Qty", "", "Total", "", "ID"}
         ) {
             boolean[] canEdit = new boolean[]{false, false, false, false, false, false, false};
 
@@ -40,6 +44,13 @@ public class POSPanel extends javax.swing.JPanel {
         tblCart.getTableHeader().setBackground(new java.awt.Color(255, 255, 255));
         tblCart.getTableHeader().setForeground(new java.awt.Color(100, 116, 139));
         javax.swing.UIManager.put("TableHeader.separatorColor", new java.awt.Color(0, 0, 0, 0));
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblCart.getColumnCount(); i++) {
+            tblCart.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         if (tblCart.getColumnModel().getColumnCount() > 0) {
             tblCart.getColumnModel().getColumn(0).setPreferredWidth(120);
@@ -69,6 +80,19 @@ public class POSPanel extends javax.swing.JPanel {
                             model.setValueAt(currentQty - 1, row, 2);
                             model.setValueAt((currentQty - 1) * unitPrice, row, 4);
                             updateTotal();
+                        }
+                    } else if (col == 2) {
+                        String input = javax.swing.JOptionPane.showInputDialog(null, "Enter new quantity:", currentQty);
+                        if (input != null && !input.trim().isEmpty()) {
+                            try {
+                                int newQty = Integer.parseInt(input.trim());
+                                if (newQty > 0) {
+                                    model.setValueAt(newQty, row, 2);
+                                    model.setValueAt(newQty * unitPrice, row, 4);
+                                    updateTotal();
+                                }
+                            } catch (NumberFormatException ex) {
+                            }
                         }
                     } else if (col == 3) {
                         model.setValueAt(currentQty + 1, row, 2);
@@ -126,7 +150,7 @@ public class POSPanel extends javax.swing.JPanel {
             Connection conn = DBConnection.getConnection();
 
             StringBuilder sql = new StringBuilder(
-                    "SELECT p.product_id, p.name, p.price "
+                    "SELECT p.product_id, p.name, p.price, p.image_path " // <-- ADDED THIS
                     + "FROM Products p "
                     + "INNER JOIN Categories c ON p.category_id = c.category_id "
                     + "WHERE p.is_archived = 0 "
@@ -158,8 +182,9 @@ public class POSPanel extends javax.swing.JPanel {
                 int id = rs.getInt("product_id");
                 String name = rs.getString("name");
                 double price = rs.getDouble("price");
+                String imgPath = rs.getString("image_path");
 
-                ProductCard card = new ProductCard(id, name, price, this);
+                ProductCard card = new ProductCard(id, name, price, imgPath, this);
                 menuGrid.add(card);
             }
 
@@ -296,6 +321,7 @@ public class POSPanel extends javax.swing.JPanel {
 
         menuContainer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 650, 50));
 
+        txtSearch.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtSearch.addActionListener(this::txtSearchActionPerformed);
         menuContainer.add(txtSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 410, 30));
 
@@ -370,8 +396,8 @@ public class POSPanel extends javax.swing.JPanel {
         });
         jScrollPane2.setViewportView(tblCart);
 
-        jPanel3.setBackground(new java.awt.Color(224, 224, 224));
-        jPanel3.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
+        jPanel3.setBackground(new java.awt.Color(252, 251, 248));
+        jPanel3.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
 
         Total1.setFont(new java.awt.Font("Geist Medium", 0, 18)); // NOI18N
         Total1.setForeground(new java.awt.Color(227, 83, 10));
@@ -397,7 +423,7 @@ public class POSPanel extends javax.swing.JPanel {
                 .addComponent(Total1)
                 .addGap(0, 0, 0)
                 .addComponent(lblTotal)
-                .addContainerGap())
+                .addGap(13, 13, 13))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -410,9 +436,13 @@ public class POSPanel extends javax.swing.JPanel {
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
+        jLabel3.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
         jLabel3.setText("Cash Received");
 
+        jLabel4.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
         jLabel4.setText("Change ");
+
+        txtCash.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
 
         lblChange.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         lblChange.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -424,8 +454,8 @@ public class POSPanel extends javax.swing.JPanel {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblChange, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblChange, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -435,9 +465,13 @@ public class POSPanel extends javax.swing.JPanel {
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
+        btnClear.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnClear.setText("Clear");
         btnClear.addActionListener(this::btnClearActionPerformed);
 
+        btnCheckout.setBackground(new java.awt.Color(227, 83, 10));
+        btnCheckout.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        btnCheckout.setForeground(new java.awt.Color(255, 255, 255));
         btnCheckout.setText("Pay");
         btnCheckout.addActionListener(this::btnCheckoutActionPerformed);
 
@@ -445,7 +479,7 @@ public class POSPanel extends javax.swing.JPanel {
         cartContainer.setLayout(cartContainerLayout);
         cartContainerLayout.setHorizontalGroup(
             cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
             .addGroup(cartContainerLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -457,8 +491,10 @@ public class POSPanel extends javax.swing.JPanel {
                             .addComponent(txtCash, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(cartContainerLayout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(95, 95, 95))
+                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(cartContainerLayout.createSequentialGroup()
                         .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -485,7 +521,7 @@ public class POSPanel extends javax.swing.JPanel {
                 .addGroup(cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnClear, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
                     .addComponent(btnCheckout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 26, Short.MAX_VALUE))
+                .addGap(0, 25, Short.MAX_VALUE))
         );
 
         add(cartContainer, new org.netbeans.lib.awtextra.AbsoluteConstraints(695, 10, 310, 610));
@@ -596,35 +632,45 @@ public class POSPanel extends javax.swing.JPanel {
             conn.commit();
 
             double change = cashReceived - currentTotal;
+            double vatableSales = currentTotal / 1.12;
+            double vatAmount = currentTotal - vatableSales;
+
             StringBuilder receipt = new StringBuilder();
             receipt.append("==========================================\n");
-            receipt.append("              WEEFEE FOODHUB              \n");
-            receipt.append("           123 Culinary Avenue            \n");
-            receipt.append("           Manila, Philippines            \n");
-            receipt.append("==========================================\n");
-            receipt.append(String.format(" Receipt # : %d\n", transactionId));
-            receipt.append(String.format(" Date      : %s\n", new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a").format(new java.util.Date())));
-            receipt.append(String.format(" Cashier   : %s\n", LoginPanel.loggedInUsername));
+            receipt.append("              WEEFEE FOODHUB\n");
+            receipt.append("        1878 Tayuman St. Sta. Cruz\n");
+            receipt.append("              Manila Philippines\n");
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-20s %-5s %-7s %-7s\n", "ITEM", "QTY", "PRICE", "TOTAL"));
+            receipt.append("              SALES INVOICE\n");
+            receipt.append("TIN: 123-456-789-000\n");
+            receipt.append("VAT REG TIN\n");
+            receipt.append("MIN: 24010123456789012\n");
+            receipt.append("==========================================\n");
+            receipt.append(String.format("Receipt No : %d\n", transactionId));
+            receipt.append(String.format("Date       : %s\n", new java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a").format(new java.util.Date())));
+            receipt.append(String.format("Cashier    : %s\n", LoginPanel.loggedInUsername));
+            receipt.append("------------------------------------------\n");
+            receipt.append(String.format("%-22s %-5s %11s\n", "ITEM", "QTY", "TOTAL"));
             receipt.append("------------------------------------------\n");
 
             for (int i = 0; i < model.getRowCount(); i++) {
                 String rawName = (String) model.getValueAt(i, 0);
-                String itemName = rawName.length() > 18 ? rawName.substring(0, 15) + "..." : rawName;
+                String itemName = rawName.length() > 18 ? rawName.substring(0, 18) : rawName;
                 int qty = (int) model.getValueAt(i, 2);
                 double lineTotal = (double) model.getValueAt(i, 4);
-                double unitPrice = lineTotal / qty;
 
-                receipt.append(String.format("%-20s %-5d %-7.2f %-7.2f\n", itemName, qty, unitPrice, lineTotal));
+                receipt.append(String.format("%-22s %-5d   ₱%8.2f\n", itemName, qty, lineTotal));
             }
 
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-33s %-7.2f\n", "GRAND TOTAL:", currentTotal));
-            receipt.append(String.format("%-33s %-7.2f\n", "CASH RECEIVED:", cashReceived));
-            receipt.append(String.format("%-33s %-7.2f\n", "CHANGE:", change));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "VATable Sales", vatableSales));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "VAT Amount", vatAmount));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "TOTAL", currentTotal));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "CASH", cashReceived));
+            receipt.append(String.format("%-25s ₱%11.2f\n", "CHANGE", change));
             receipt.append("==========================================\n");
-            receipt.append("         Thank you for dining with us!    \n");
+            receipt.append("      THIS SERVES AS YOUR SALES INVOICE   \n");
+            receipt.append("            THANK YOU! COME AGAIN         \n");
             receipt.append("==========================================\n");
 
             javax.swing.JTextArea txtReceipt = new javax.swing.JTextArea(receipt.toString());

@@ -1,9 +1,17 @@
 package ui.menuPanel;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+
 public class ReportsPanel extends javax.swing.JPanel {
 
     public ReportsPanel() {
         initComponents();
+        
+        txtStartDate.putClientProperty("JTextField.placeholderText", "yyyy-mm-dd");
+        txtEndDate.putClientProperty("JTextField.placeholderText", "yyyy-mm-dd");
 
         tblReports.getTableHeader().setFont(
                 new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
@@ -16,6 +24,14 @@ public class ReportsPanel extends javax.swing.JPanel {
         );
         tblReports.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblReports.setShowGrid(false);
+        
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblReports.getColumnCount(); i++) {
+            tblReports.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
     }
 
     /**
@@ -36,6 +52,7 @@ public class ReportsPanel extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         txtEndDate = new javax.swing.JTextField();
         btnGenerateReport = new javax.swing.JButton();
+        Export = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -85,16 +102,26 @@ public class ReportsPanel extends javax.swing.JPanel {
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(204, 204, 204), 1, true));
 
+        jLabel2.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
         jLabel2.setText("Start Date:");
 
+        txtStartDate.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtStartDate.addActionListener(this::txtStartDateActionPerformed);
 
+        jLabel3.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
         jLabel3.setText("End Date:");
 
+        txtEndDate.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtEndDate.addActionListener(this::txtEndDateActionPerformed);
 
+        btnGenerateReport.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnGenerateReport.setText("Generate");
         btnGenerateReport.addActionListener(this::btnGenerateReportActionPerformed);
+
+        Export.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        Export.setForeground(new java.awt.Color(102, 102, 102));
+        Export.setText("Export to CSV");
+        Export.addActionListener(this::ExportActionPerformed);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -109,7 +136,9 @@ public class ReportsPanel extends javax.swing.JPanel {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(txtEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 459, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 326, Short.MAX_VALUE)
+                .addComponent(Export, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnGenerateReport, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(37, 37, 37))
         );
@@ -127,7 +156,9 @@ public class ReportsPanel extends javax.swing.JPanel {
                 .addContainerGap(10, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnGenerateReport, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnGenerateReport, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Export, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(14, 14, 14))
         );
 
@@ -248,6 +279,7 @@ public class ReportsPanel extends javax.swing.JPanel {
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
+        tblReports.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblReports.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -262,11 +294,19 @@ public class ReportsPanel extends javax.swing.JPanel {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.Double.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
         });
+        tblReports.setRowHeight(35);
         jScrollPane1.setViewportView(tblReports);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -303,7 +343,7 @@ public class ReportsPanel extends javax.swing.JPanel {
                     .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 27, Short.MAX_VALUE))
+                .addGap(0, 25, Short.MAX_VALUE))
         );
 
         add(jPanel1, new java.awt.GridBagConstraints());
@@ -416,8 +456,52 @@ public class ReportsPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtEndDateActionPerformed
 
+    private void ExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportActionPerformed
+        if (tblReports.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "There is no data to export!", "Export Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export to CSV");
+        fileChooser.setSelectedFile(new java.io.File("SalesReport.csv"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            
+            try (java.io.FileWriter fw = new java.io.FileWriter(fileToSave); java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+
+                for (int i = 0; i < tblReports.getColumnCount(); i++) {
+                    bw.write(tblReports.getColumnName(i) + ",");
+                }
+                bw.newLine(); 
+
+                for (int i = 0; i < tblReports.getRowCount(); i++) {
+                    for (int j = 0; j < tblReports.getColumnCount(); j++) {
+                        Object cellValue = tblReports.getValueAt(i, j);
+
+                        if (cellValue != null) {
+                            bw.write(cellValue.toString().replace(",", "") + ",");
+                        } else {
+                            bw.write(",");
+                        }
+                    }
+                    bw.newLine(); 
+                }
+
+                JOptionPane.showMessageDialog(this, "Data successfully exported to:\n" + fileToSave.getAbsolutePath(), "Export Success", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error exporting file: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_ExportActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Export;
     private javax.swing.JButton btnGenerateReport;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

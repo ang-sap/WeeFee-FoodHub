@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.SwingConstants;
 import ui.dialogs.AddProductDialog;
+import ui.auth.LoginPanel;
 
 public class ProductsPanel extends javax.swing.JPanel {
 
@@ -14,7 +15,7 @@ public class ProductsPanel extends javax.swing.JPanel {
         loadProducts("");
 
         tblProducts.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 11)
         );
         tblProducts.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
@@ -34,10 +35,22 @@ public class ProductsPanel extends javax.swing.JPanel {
     }
 
     public void loadProducts(String searchQuery) {
-        String sql = "SELECT product_id, product_name, category_name, price, current_stock "
-                + "FROM vw_ProductList "
-                + "WHERE product_name LIKE ? OR category_name LIKE ? "
-                + "ORDER BY product_name ASC";
+        boolean showArchived = chkShowArchived.isSelected();
+        String sql;
+
+        if (showArchived) {
+            sql = "SELECT p.product_id, p.name AS product_name, c.category_name, p.price, ISNULL(i.current_stock, 0) AS current_stock "
+                    + "FROM Products p "
+                    + "JOIN Categories c ON p.category_id = c.category_id "
+                    + "LEFT JOIN Inventory i ON p.product_id = i.product_id "
+                    + "WHERE p.is_archived = 1 AND (p.name LIKE ? OR c.category_name LIKE ?) "
+                    + "ORDER BY p.name ASC";
+        } else {
+            sql = "SELECT product_id, product_name, category_name, price, current_stock "
+                    + "FROM vw_ProductList "
+                    + "WHERE product_name LIKE ? OR category_name LIKE ? "
+                    + "ORDER BY product_name ASC";
+        }
 
         try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -82,6 +95,7 @@ public class ProductsPanel extends javax.swing.JPanel {
         btnArchive = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblProducts = new javax.swing.JTable();
+        chkShowArchived = new javax.swing.JCheckBox();
 
         setBackground(new java.awt.Color(248, 250, 252));
         setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 25, 30, 25));
@@ -128,13 +142,13 @@ public class ProductsPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 341, Short.MAX_VALUE)
-                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 423, Short.MAX_VALUE)
+                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnArchive, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44))
+                .addComponent(btnArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -145,14 +159,14 @@ public class ProductsPanel extends javax.swing.JPanel {
                     .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnArchive, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         cardContainer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 980, 70));
 
         jScrollPane2.setPreferredSize(new java.awt.Dimension(930, 400));
 
-        tblProducts.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        tblProducts.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         tblProducts.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -182,7 +196,12 @@ public class ProductsPanel extends javax.swing.JPanel {
         tblProducts.setRowHeight(35);
         jScrollPane2.setViewportView(tblProducts);
 
-        cardContainer.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, -1, 480));
+        cardContainer.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, -1, 470));
+
+        chkShowArchived.setFont(new java.awt.Font("Geist SemiBold", 0, 10)); // NOI18N
+        chkShowArchived.setText("Show Archived");
+        chkShowArchived.addActionListener(this::chkShowArchivedActionPerformed);
+        cardContainer.add(chkShowArchived, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 100, -1));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -204,33 +223,49 @@ public class ProductsPanel extends javax.swing.JPanel {
 
     private void btnArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArchiveActionPerformed
         int selectedRow = tblProducts.getSelectedRow();
-
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a product from the table first.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a product first.");
             return;
         }
 
         int productId = (int) tblProducts.getValueAt(selectedRow, 0);
         String productName = (String) tblProducts.getValueAt(selectedRow, 1);
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this, "Are you sure you want to archive '" + productName + "'?", "Confirm Archive", javax.swing.JOptionPane.YES_NO_OPTION);
+        boolean isArchivedView = chkShowArchived.isSelected();
+        String actionWord = isArchivedView ? "restore" : "archive";
+        String logAction = isArchivedView ? "RESTORE_PRODUCT" : "ARCHIVE_PRODUCT";
+        int newArchiveStatus = isArchivedView ? 0 : 1;
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to " + actionWord + " '" + productName + "'?",
+                "Confirm Action",
+                javax.swing.JOptionPane.YES_NO_OPTION);
 
         if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-            try {
-                java.sql.Connection conn = database.DBConnection.getConnection();
+            try (java.sql.Connection conn = database.DBConnection.getConnection()) {
 
-                String sql = "UPDATE Products SET is_archived = 1 WHERE product_id = ?";
-                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setInt(1, productId);
-                pstmt.executeUpdate();
+                String sql = "UPDATE Products SET is_archived = ? WHERE product_id = ?";
+                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setInt(1, newArchiveStatus);
+                    pstmt.setInt(2, productId);
+                    pstmt.executeUpdate();
+                }
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Product Archived Successfully!");
+                String logSql = "{call sp_InsertAuditLog(?, ?, ?)}";
+                try (java.sql.CallableStatement cstmtLog = conn.prepareCall(logSql)) {
+                    cstmtLog.setInt(1, LoginPanel.loggedInUserId);
+                    cstmtLog.setString(2, logAction);
+                    cstmtLog.setString(3, actionWord.substring(0, 1).toUpperCase() + actionWord.substring(1) + "d Product ID: " + productId);
+                    cstmtLog.execute();
+                }
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Product " + actionWord + "d successfully.");
 
                 loadProducts("");
 
             } catch (Exception e) {
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Error archiving product.", "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Error processing request: " + e.getMessage());
             }
         }
     }//GEN-LAST:event_btnArchiveActionPerformed
@@ -258,12 +293,23 @@ public class ProductsPanel extends javax.swing.JPanel {
         loadProducts("");
     }//GEN-LAST:event_btnUpdateActionPerformed
 
+    private void chkShowArchivedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowArchivedActionPerformed
+        if (chkShowArchived.isSelected()) {
+            btnArchive.setText("Restore");
+        } else {
+            btnArchive.setText("Archive");
+        }
+
+        loadProducts("");
+    }//GEN-LAST:event_chkShowArchivedActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnArchive;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JPanel cardContainer;
+    private javax.swing.JCheckBox chkShowArchived;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;

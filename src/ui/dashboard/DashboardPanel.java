@@ -332,6 +332,7 @@ public class DashboardPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNavAuditLogsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNavAuditLogsActionPerformed
+        logsScreen.loadLogs("");
         cardLayout.show(MainCardsPanel, "CardLogs");
         setActiveNavButton(btnNavAuditLogs);
     }//GEN-LAST:event_btnNavAuditLogsActionPerformed
@@ -365,16 +366,19 @@ public class DashboardPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnNavLogoutActionPerformed
 
     private void btnNavPOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNavPOSActionPerformed
+        posScreen.loadMenuCards("", "All");
         cardLayout.show(MainCardsPanel, "CardPOS");
         setActiveNavButton(btnNavPOS);
     }//GEN-LAST:event_btnNavPOSActionPerformed
 
     private void btnNavInventoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNavInventoryActionPerformed
+        inventoryScreen.loadInventoryToTable();
         cardLayout.show(MainCardsPanel, "CardInventory");
         setActiveNavButton(btnNavInventory);
     }//GEN-LAST:event_btnNavInventoryActionPerformed
 
     private void btnNavProductsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNavProductsActionPerformed
+        productsScreen.loadProducts("");
         cardLayout.show(MainCardsPanel, "CardProducts");
         setActiveNavButton(btnNavProducts);
     }//GEN-LAST:event_btnNavProductsActionPerformed
@@ -391,6 +395,7 @@ public class DashboardPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnNavTransactionsActionPerformed
 
     private void btnNavPurchasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNavPurchasesActionPerformed
+        purchasesScreen.loadPurchases();
         cardLayout.show(MainCardsPanel, "CardPurchases");
         setActiveNavButton(btnNavPurchases);
     }//GEN-LAST:event_btnNavPurchasesActionPerformed

@@ -1,6 +1,9 @@
 package ui.menuPanel;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class InventoryPanel extends javax.swing.JPanel {
 
@@ -18,6 +21,13 @@ public class InventoryPanel extends javax.swing.JPanel {
         );
         tblInventory.setIntercellSpacing(new java.awt.Dimension(0, 0));
         tblInventory.setShowGrid(false);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < tblInventory.getColumnCount(); i++) {
+            tblInventory.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
 
         loadInventoryToTable();
     }
@@ -41,7 +51,7 @@ public class InventoryPanel extends javax.swing.JPanel {
             while (rs.next()) {
                 int stock = rs.getInt("current_stock");
 
-                String status = (stock == 0) ? "Out of Stock" : (stock <= 15) ? "Low Stock" : "Healthy";
+                String status = (stock == 0) ? "Out of Stock" : (stock <= 15) ? "Low Stock" : "In Stock";
 
                 model.addRow(new Object[]{
                     rs.getInt("product_id"),
@@ -69,6 +79,7 @@ public class InventoryPanel extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         btnUpdate = new javax.swing.JButton();
+        Export = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblInventory = new javax.swing.JTable();
 
@@ -95,6 +106,12 @@ public class InventoryPanel extends javax.swing.JPanel {
         btnUpdate.setPreferredSize(new java.awt.Dimension(100, 35));
         btnUpdate.addActionListener(this::btnUpdateActionPerformed);
 
+        Export.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
+        Export.setForeground(new java.awt.Color(102, 102, 102));
+        Export.setText("Export to CSV");
+        Export.setPreferredSize(new java.awt.Dimension(100, 35));
+        Export.addActionListener(this::ExportActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -102,9 +119,11 @@ public class InventoryPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 543, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 441, Short.MAX_VALUE)
+                .addComponent(Export, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44))
+                .addGap(20, 20, 20))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -112,7 +131,8 @@ public class InventoryPanel extends javax.swing.JPanel {
                 .addGap(21, 21, 21)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(Export, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(13, Short.MAX_VALUE))
         );
 
@@ -134,7 +154,7 @@ public class InventoryPanel extends javax.swing.JPanel {
                 java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, true, true
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -145,9 +165,10 @@ public class InventoryPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        tblInventory.setRowHeight(35);
         jScrollPane1.setViewportView(tblInventory);
 
-        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 940, 480));
+        cardContainer.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 940, 490));
 
         add(cardContainer, new java.awt.GridBagConstraints());
     }// </editor-fold>//GEN-END:initComponents
@@ -183,8 +204,52 @@ public class InventoryPanel extends javax.swing.JPanel {
         loadInventoryToTable();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
+    private void ExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportActionPerformed
+        if (tblInventory.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "There is no data to export!", "Export Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export to CSV");
+        fileChooser.setSelectedFile(new java.io.File("SalesReport.csv"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+
+            try (java.io.FileWriter fw = new java.io.FileWriter(fileToSave); java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+
+                for (int i = 0; i < tblInventory.getColumnCount(); i++) {
+                    bw.write(tblInventory.getColumnName(i) + ",");
+                }
+                bw.newLine();
+
+                for (int i = 0; i < tblInventory.getRowCount(); i++) {
+                    for (int j = 0; j < tblInventory.getColumnCount(); j++) {
+                        Object cellValue = tblInventory.getValueAt(i, j);
+
+                        if (cellValue != null) {
+                            bw.write(cellValue.toString().replace(",", "") + ",");
+                        } else {
+                            bw.write(",");
+                        }
+                    }
+                    bw.newLine();
+                }
+
+                JOptionPane.showMessageDialog(this, "Data successfully exported to:\n" + fileToSave.getAbsolutePath(), "Export Success", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error exporting file: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_ExportActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Export;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JPanel cardContainer;
     private javax.swing.JLabel jLabel1;

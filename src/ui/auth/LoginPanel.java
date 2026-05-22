@@ -70,6 +70,10 @@ public class LoginPanel extends javax.swing.JPanel {
         leftPanel.setBackground(new java.awt.Color(232, 90, 14));
         leftPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
+        logoLabel.setMaximumSize(new java.awt.Dimension(28, 28));
+        logoLabel.setMinimumSize(new java.awt.Dimension(28, 28));
+        logoLabel.setPreferredSize(new java.awt.Dimension(28, 28));
+
         jLabel5.setBackground(new java.awt.Color(255, 255, 255));
         jLabel5.setFont(new java.awt.Font("Georgia", 1, 20)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
@@ -85,12 +89,12 @@ public class LoginPanel extends javax.swing.JPanel {
         jLabel7.setText("<html>\nSimplify sales, inventory, and daily operations.\n</html>");
         jLabel7.setToolTipText("");
 
-        jLabel8.setFont(new java.awt.Font("Geist Medium", 0, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(252, 232, 221));
+        jLabel8.setFont(new java.awt.Font("Geist Medium", 0, 16)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("<html>\nA desktop management system designed for WeeFee FoodHub to help manage transactions, products, inventory, expenses, and reports more efficiently.\n</html>");
 
-        jLabel9.setFont(new java.awt.Font("Geist Medium", 0, 14)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(252, 232, 221));
+        jLabel9.setFont(new java.awt.Font("Geist Medium", 0, 16)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
         jLabel9.setText("<html>• Faster transaction processing <br>• Real-time inventory monitoring <br>• Organized expense tracking <br>• Automated sales reports </html>");
 
         javax.swing.GroupLayout leftPanelLayout = new javax.swing.GroupLayout(leftPanel);
@@ -121,13 +125,13 @@ public class LoginPanel extends javax.swing.JPanel {
                         .addComponent(jLabel5)
                         .addGap(3, 3, 3)
                         .addComponent(jLabel6)))
-                .addGap(94, 94, 94)
+                .addGap(78, 78, 78)
                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(218, Short.MAX_VALUE))
+                .addContainerGap(226, Short.MAX_VALUE))
         );
 
         add(leftPanel);
@@ -148,6 +152,7 @@ public class LoginPanel extends javax.swing.JPanel {
         jLabel3.setPreferredSize(new java.awt.Dimension(300, 35));
 
         txtUsername.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
+        txtUsername.setSelectionColor(new java.awt.Color(232, 90, 14));
         txtUsername.addActionListener(this::txtUsernameActionPerformed);
 
         jLabel4.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
@@ -164,6 +169,7 @@ public class LoginPanel extends javax.swing.JPanel {
 
         txtPassword.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         txtPassword.setPreferredSize(new java.awt.Dimension(64, 20));
+        txtPassword.setSelectionColor(new java.awt.Color(232, 90, 14));
         txtPassword.addActionListener(this::txtPasswordActionPerformed);
 
         javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
@@ -185,7 +191,7 @@ public class LoginPanel extends javax.swing.JPanel {
         rightPanelLayout.setVerticalGroup(
             rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rightPanelLayout.createSequentialGroup()
-                .addContainerGap(191, Short.MAX_VALUE)
+                .addContainerGap(188, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)

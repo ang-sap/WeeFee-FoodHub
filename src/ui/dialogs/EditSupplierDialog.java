@@ -49,10 +49,12 @@ public class EditSupplierDialog extends javax.swing.JDialog {
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         btnCancel.setBackground(new java.awt.Color(241, 245, 249));
+        btnCancel.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(this::btnCancelActionPerformed);
 
         btnSave.setBackground(new java.awt.Color(227, 83, 10));
+        btnSave.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save Supplier");
         btnSave.addActionListener(this::btnSaveActionPerformed);
