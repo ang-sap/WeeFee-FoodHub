@@ -105,7 +105,7 @@ public class PurchasesPanel extends javax.swing.JPanel {
         btnVoid.setBackground(new java.awt.Color(254, 226, 226));
         btnVoid.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnVoid.setForeground(new java.awt.Color(153, 27, 27));
-        btnVoid.setText("Void");
+        btnVoid.setText("Update Status");
         btnVoid.setPreferredSize(new java.awt.Dimension(113, 30));
         btnVoid.addActionListener(this::btnVoidActionPerformed);
 
@@ -116,10 +116,10 @@ public class PurchasesPanel extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 583, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 532, Short.MAX_VALUE)
                 .addComponent(btnNewPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnVoid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(22, 22, 22))
         );
         jPanel1Layout.setVerticalGroup(
@@ -186,21 +186,23 @@ public class PurchasesPanel extends javax.swing.JPanel {
         int selectedRow = tblPurchases.getSelectedRow();
 
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a purchase order to void.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a purchase order to update.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int purchaseId = (int) tblPurchases.getValueAt(selectedRow, 0);
         String currentStatus = (String) tblPurchases.getValueAt(selectedRow, 4);
 
-        if ("Pending".equalsIgnoreCase(currentStatus)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "This purchase is already marked as Cancelled.", "Already Cancelled", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+        boolean isCurrentlyPending = "Pending".equalsIgnoreCase(currentStatus);
+
+        String newStatus = isCurrentlyPending ? "Delivered" : "Pending";
+        String actionWord = isCurrentlyPending ? "mark as Delivered" : "revert to Pending";
+        String stockAction = isCurrentlyPending ? "add the items to" : "remove the items from";
+        String mathOperator = isCurrentlyPending ? "+" : "-"; // Decide whether to add or subtract
 
         int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to cancel Purchase #" + purchaseId + "?\nThis will remove the items from the kitchen inventory.",
-                "Confirm Void", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+                "Are you sure you want to " + actionWord + " Purchase #" + purchaseId + "?\nThis will " + stockAction + " the kitchen inventory.",
+                "Confirm Status Update", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
 
         if (confirm != javax.swing.JOptionPane.YES_OPTION) {
             return;
@@ -211,41 +213,46 @@ public class PurchasesPanel extends javax.swing.JPanel {
             conn = database.DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            String sqlVoid = "UPDATE Purchases SET status = 'Pending' WHERE purchase_id = ?";
-            try (java.sql.PreparedStatement pstmtVoid = conn.prepareStatement(sqlVoid)) {
-                pstmtVoid.setInt(1, purchaseId);
-                pstmtVoid.executeUpdate();
+            String sqlStatus = "UPDATE Purchases SET status = ? WHERE purchase_id = ?";
+            try (java.sql.PreparedStatement pstmtStatus = conn.prepareStatement(sqlStatus)) {
+                pstmtStatus.setString(1, newStatus);
+                pstmtStatus.setInt(2, purchaseId);
+                pstmtStatus.executeUpdate();
             }
 
             String sqlGetItems = "SELECT product_id, quantity_bought FROM Purchase_Details WHERE purchase_id = ?";
-            String sqlRemove = "UPDATE Inventory SET current_stock = current_stock - ? WHERE product_id = ?";
+            String sqlInventory = "UPDATE Inventory SET current_stock = current_stock " + mathOperator + " ? WHERE product_id = ?";
 
-            try (java.sql.PreparedStatement pstmtGetItems = conn.prepareStatement(sqlGetItems); java.sql.PreparedStatement pstmtRemove = conn.prepareStatement(sqlRemove)) {
+            try (java.sql.PreparedStatement pstmtGetItems = conn.prepareStatement(sqlGetItems); java.sql.PreparedStatement pstmtInv = conn.prepareStatement(sqlInventory)) {
 
                 pstmtGetItems.setInt(1, purchaseId);
                 try (java.sql.ResultSet rsItems = pstmtGetItems.executeQuery()) {
                     while (rsItems.next()) {
                         int productId = rsItems.getInt("product_id");
-                        int qtyToRemove = rsItems.getInt("quantity_bought");
+                        int qty = rsItems.getInt("quantity_bought");
 
-                        pstmtRemove.setInt(1, qtyToRemove);
-                        pstmtRemove.setInt(2, productId);
-                        pstmtRemove.addBatch();
+                        pstmtInv.setInt(1, qty);
+                        pstmtInv.setInt(2, productId);
+                        pstmtInv.addBatch();
                     }
                 }
-                pstmtRemove.executeBatch();
+                pstmtInv.executeBatch();
             }
 
-            String sqlLog = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'VOID_PURCHASE', ?)";
+            String logDesc = isCurrentlyPending
+                    ? "Marked Purchase ID: " + purchaseId + " as Delivered and added stock."
+                    : "Reverted Purchase ID: " + purchaseId + " to Pending and removed stock.";
+
+            String sqlLog = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'UPDATE_PURCHASE', ?)";
             try (java.sql.PreparedStatement pstmtLog = conn.prepareStatement(sqlLog)) {
                 pstmtLog.setInt(1, LoginPanel.loggedInUserId);
-                pstmtLog.setString(2, "Cancelled Purchase ID: " + purchaseId + " and removed stock.");
+                pstmtLog.setString(2, logDesc);
                 pstmtLog.executeUpdate();
             }
 
             conn.commit();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Purchase #" + purchaseId + " successfully cancelled.\nInventory has been deducted.", "Void Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Purchase #" + purchaseId + " successfully updated to " + newStatus + ".", "Status Updated", javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
             loadPurchases();
 
@@ -260,12 +267,12 @@ public class PurchasesPanel extends javax.swing.JPanel {
             String errorMsg = e.getMessage();
             if (errorMsg != null && errorMsg.contains("constraint") && errorMsg.contains("current_stock")) {
                 javax.swing.JOptionPane.showMessageDialog(this,
-                        "Void Failed: Items Already Sold!\n\nYou cannot cancel this purchase because the kitchen has already sold some of these items. Voiding it would cause negative stock.",
+                        "Update Failed: Items Already Sold!\n\nYou cannot revert this purchase to Pending because the kitchen has already sold some of these items. Reverting it would cause negative stock.",
                         "Inventory Protection",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
             } else {
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Error voiding purchase: " + errorMsg, "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Error updating purchase: " + errorMsg, "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
             }
         } finally {
             if (conn != null) {

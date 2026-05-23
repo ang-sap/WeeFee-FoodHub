@@ -68,7 +68,6 @@ public class ProductsPanel extends javax.swing.JPanel {
                         rs.getString("product_name"),
                         rs.getString("category_name"),
                         rs.getDouble("price"),
-                        rs.getInt("current_stock")
                     });
                 }
             }

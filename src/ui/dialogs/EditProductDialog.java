@@ -104,7 +104,7 @@ public class EditProductDialog extends javax.swing.JDialog {
         txtPrice.addActionListener(this::txtPriceActionPerformed);
 
         cbCategory.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Meals", "Drinks ", "Snacks" }));
+        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rice Meals", "Burgers", "Fries", "Drinks", "Add-ons", "Desserts", "Noodles", "Pasta", "Pizza", "Appetizers", "Salads", "Soups", "Sandwiches", "Combos", "Snacks", "Specials", "Breakfast", "Lunch", "Dinner", "Catering" }));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

@@ -169,13 +169,23 @@ public class AddProductDialog extends javax.swing.JDialog {
             Connection conn = DBConnection.getConnection();
 
             String sql = "INSERT INTO Products (name, category_id, price, is_archived) VALUES (?, ?, ?, 0)";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement pstmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
 
             pstmt.setString(1, name);
             pstmt.setInt(2, categoryId);
             pstmt.setDouble(3, price);
 
             pstmt.executeUpdate();
+
+            java.sql.ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                int newProductId = rs.getInt(1);
+
+                String invSql = "INSERT INTO Inventory (product_id, current_stock) VALUES (?, 0)";
+                PreparedStatement invPstmt = conn.prepareStatement(invSql);
+                invPstmt.setInt(1, newProductId);
+                invPstmt.executeUpdate();
+            }
 
             JOptionPane.showMessageDialog(this, "Product Added Successfully!");
             this.dispose();

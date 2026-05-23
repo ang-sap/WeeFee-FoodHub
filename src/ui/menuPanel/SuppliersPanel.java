@@ -56,8 +56,8 @@ public class SuppliersPanel extends javax.swing.JPanel {
                     model.addRow(new Object[]{
                         rs.getInt("supplier_id"),
                         rs.getString("supplier_name"),
-                        rs.getString("contact_no"),
-                        rs.getString("address")
+                        rs.getString("address"), 
+                        rs.getString("contact_no") 
                     });
                 }
             }
