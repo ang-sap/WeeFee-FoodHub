@@ -38,7 +38,7 @@ public class PurchasesPanel extends javax.swing.JPanel {
                 + "JOIN Suppliers s ON p.supplier_id = s.supplier_id "
                 + "JOIN Purchase_Details pd ON p.purchase_id = pd.purchase_id "
                 + "JOIN Products prod ON pd.product_id = prod.product_id "
-                + "ORDER BY p.purchase_date DESC";
+                + "ORDER BY p.purchase_id DESC";
 
         try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql); java.sql.ResultSet rs = pstmt.executeQuery()) {
 

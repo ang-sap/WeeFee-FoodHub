@@ -28,7 +28,7 @@ public class ExpensesPanel extends javax.swing.JPanel {
     }
 
     public void loadExpenses() {
-        String sql = "SELECT expense_id, date_paid, category, amount, status, description FROM Expenses ORDER BY date_paid DESC";
+        String sql = "SELECT expense_id, date_paid, category, amount, status, description FROM Expenses ORDER BY expense_id DESC";
 
         try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql); java.sql.ResultSet rs = pstmt.executeQuery()) {
 

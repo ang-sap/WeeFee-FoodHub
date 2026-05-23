@@ -47,7 +47,7 @@ public class SystemLogsPanel extends javax.swing.JPanel {
                     + "FROM AuditLogs a "
                     + "LEFT JOIN Users u ON a.user_id = u.user_id "
                     + "WHERE a.action LIKE ? OR a.description LIKE ? OR ISNULL(u.username, '') LIKE ? "
-                    + "ORDER BY a.log_date DESC";
+                    + "ORDER BY a.log_id DESC";
 
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
             String searchParam = "%" + searchQuery.trim() + "%";

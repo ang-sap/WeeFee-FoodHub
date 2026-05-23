@@ -101,7 +101,7 @@ public class AddExpenseDialog extends javax.swing.JDialog {
         txtAmount.addActionListener(this::txtAmountActionPerformed);
 
         cbCategory.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Meals", "Drinks ", "Snacks" }));
+        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rice Meals", "Burgers", "Fries", "Drinks", "Add-ons", "Desserts", "Noodles", "Pasta", "Pizza", "Appetizers", "Salads", "Soups", "Sandwiches", "Combos", "Snacks", "Specials", "Breakfast", "Lunch", "Dinner", "Catering" }));
 
         jLabel4.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         jLabel4.setText("Remarks");

@@ -19,7 +19,7 @@ public class ProductCard extends javax.swing.JPanel {
 
         initComponents();
 
-        lblProductName.setText(name);
+        lblProductName.setText("<html><body style='width: 105px;'>" + name + "</body></html>");
         lblPrice.setText(String.format("%.2f", price));
 
         try { 
@@ -110,7 +110,7 @@ public class ProductCard extends javax.swing.JPanel {
 
         lblProductName.setFont(new java.awt.Font("Geist", 0, 14)); // NOI18N
         lblProductName.setText("Item Name");
-        jPanel2.add(lblProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 80, -1));
+        jPanel2.add(lblProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 130, 40));
 
         Total.setFont(new java.awt.Font("Cambria", 0, 18)); // NOI18N
         Total.setText("₱");

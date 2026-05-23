@@ -110,11 +110,28 @@
               <Font name="Geist" size="12" style="0"/>
             </Property>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="4">
+              <StringArray count="21">
                 <StringItem index="0" value="All"/>
-                <StringItem index="1" value="Meals"/>
-                <StringItem index="2" value="Drinks"/>
-                <StringItem index="3" value="Snacks"/>
+                <StringItem index="1" value="Rice Meals"/>
+                <StringItem index="2" value="Burgers"/>
+                <StringItem index="3" value="Fries"/>
+                <StringItem index="4" value="Drinks"/>
+                <StringItem index="5" value="Add-ons"/>
+                <StringItem index="6" value="Desserts"/>
+                <StringItem index="7" value="Noodles"/>
+                <StringItem index="8" value="Pasta"/>
+                <StringItem index="9" value="Pizza"/>
+                <StringItem index="10" value="Appetizers"/>
+                <StringItem index="11" value="Salads"/>
+                <StringItem index="12" value="Soups"/>
+                <StringItem index="13" value="Sandwiches"/>
+                <StringItem index="14" value="Combos"/>
+                <StringItem index="15" value="Snacks"/>
+                <StringItem index="16" value="Specials"/>
+                <StringItem index="17" value="Breakfast"/>
+                <StringItem index="18" value="Lunch"/>
+                <StringItem index="19" value="Dinner"/>
+                <StringItem index="20" value="Catering"/>
               </StringArray>
             </Property>
           </Properties>

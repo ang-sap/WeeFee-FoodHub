@@ -103,13 +103,12 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
         txtCostPrice.addActionListener(this::txtCostPriceActionPerformed);
 
         cbSupplier.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        cbSupplier.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Meals", "Drinks ", "Snacks" }));
 
         jLabel2.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         jLabel2.setText("Product");
 
         cbProduct.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        cbProduct.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Meals", "Drinks ", "Snacks" }));
+        cbProduct.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rice Meals", "Burgers", "Fries", "Drinks", "Add-ons", "Desserts", "Noodles", "Pasta", "Pizza", "Appetizers", "Salads", "Soups", "Sandwiches", "Combos", "Snacks", "Specials", "Breakfast", "Lunch", "Dinner", "Catering" }));
 
         jLabel4.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
         jLabel4.setText("Quantity");

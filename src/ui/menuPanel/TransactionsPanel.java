@@ -52,7 +52,7 @@ public class TransactionsPanel extends javax.swing.JPanel {
                    + "FROM Transactions t "
                    + "INNER JOIN Users u ON t.user_id = u.user_id "
                    + "WHERE u.username LIKE ? OR CAST(t.transaction_id AS VARCHAR) LIKE ? "
-                   + "ORDER BY t.transaction_date DESC";
+                   + "ORDER BY t.transaction_id DESC";
 
        
         try (java.sql.Connection conn = database.DBConnection.getConnection();

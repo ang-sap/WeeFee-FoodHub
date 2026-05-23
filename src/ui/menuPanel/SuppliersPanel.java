@@ -38,7 +38,7 @@ public class SuppliersPanel extends javax.swing.JPanel {
         String sql = "SELECT supplier_id, supplier_name, contact_no, address "
                 + "FROM Suppliers "
                 + "WHERE is_archived = ? AND (supplier_name LIKE ? OR address LIKE ?) "
-                + "ORDER BY supplier_name ASC";
+                + "ORDER BY supplier_id DESC";
 
         try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

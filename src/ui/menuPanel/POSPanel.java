@@ -326,7 +326,7 @@ public class POSPanel extends javax.swing.JPanel {
         menuContainer.add(txtSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 410, 30));
 
         cbCategory.setFont(new java.awt.Font("Geist", 0, 12)); // NOI18N
-        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Meals", "Drinks", "Snacks" }));
+        cbCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Rice Meals", "Burgers", "Fries", "Drinks", "Add-ons", "Desserts", "Noodles", "Pasta", "Pizza", "Appetizers", "Salads", "Soups", "Sandwiches", "Combos", "Snacks", "Specials", "Breakfast", "Lunch", "Dinner", "Catering" }));
         cbCategory.addActionListener(this::cbCategoryActionPerformed);
         menuContainer.add(cbCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 60, 190, 30));
 
@@ -479,7 +479,7 @@ public class POSPanel extends javax.swing.JPanel {
         cartContainer.setLayout(cartContainerLayout);
         cartContainerLayout.setHorizontalGroup(
             cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(cartContainerLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(cartContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
