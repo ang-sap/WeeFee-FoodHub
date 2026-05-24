@@ -56,7 +56,7 @@ public class EditSupplierDialog extends javax.swing.JDialog {
         btnSave.setBackground(new java.awt.Color(227, 83, 10));
         btnSave.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnSave.setForeground(new java.awt.Color(255, 255, 255));
-        btnSave.setText("Save Supplier");
+        btnSave.setText("Update Supplier");
         btnSave.addActionListener(this::btnSaveActionPerformed);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);

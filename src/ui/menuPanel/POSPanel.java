@@ -150,7 +150,7 @@ public class POSPanel extends javax.swing.JPanel {
             Connection conn = DBConnection.getConnection();
 
             StringBuilder sql = new StringBuilder(
-                    "SELECT p.product_id, p.name, p.price, p.image_path " // <-- ADDED THIS
+                    "SELECT p.product_id, p.name, p.price, p.image_path " 
                     + "FROM Products p "
                     + "INNER JOIN Categories c ON p.category_id = c.category_id "
                     + "WHERE p.is_archived = 0 "
