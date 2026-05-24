@@ -32,6 +32,8 @@ public class DashboardPanel extends javax.swing.JPanel {
 
     public DashboardPanel(String userRole) {
         initComponents();
+        
+        lblUser.setText(LoginPanel.loggedInUsername);
 
         cardLayout = new java.awt.CardLayout();
         MainCardsPanel.setLayout(cardLayout);
@@ -135,6 +137,8 @@ public class DashboardPanel extends javax.swing.JPanel {
         btnNavHome = new javax.swing.JButton();
         ContentWrapperPanel = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        lblUser = new javax.swing.JLabel();
         MainCardsPanel = new javax.swing.JPanel();
 
         setMaximumSize(new java.awt.Dimension(1280, 720));
@@ -297,7 +301,7 @@ public class DashboardPanel extends javax.swing.JPanel {
                 .addComponent(btnNavReports, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnNavAuditLogs, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 150, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 123, Short.MAX_VALUE)
                 .addComponent(btnNavLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(16, 16, 16))
         );
@@ -311,15 +315,33 @@ public class DashboardPanel extends javax.swing.JPanel {
         jPanel3.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(226, 232, 240)));
         jPanel3.setPreferredSize(new java.awt.Dimension(1040, 60));
 
+        jLabel4.setFont(new java.awt.Font("Geist Medium", 0, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel4.setText("Welcome");
+
+        lblUser.setFont(new java.awt.Font("Georgia", 1, 18)); // NOI18N
+        lblUser.setForeground(new java.awt.Color(15, 23, 42));
+        lblUser.setText("User");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1040, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4)
+                    .addComponent(lblUser, javax.swing.GroupLayout.PREFERRED_SIZE, 603, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(417, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 59, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(lblUser, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         ContentWrapperPanel.add(jPanel3, java.awt.BorderLayout.PAGE_START);
@@ -431,7 +453,9 @@ public class DashboardPanel extends javax.swing.JPanel {
     private javax.swing.JButton btnNavSuppliers;
     private javax.swing.JButton btnNavTransactions;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JLabel lblUser;
     private javax.swing.JPanel sidebarPanel;
     // End of variables declaration//GEN-END:variables
 }
