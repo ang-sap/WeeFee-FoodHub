@@ -163,6 +163,15 @@ public class AddProductDialog extends javax.swing.JDialog {
 
         try {
             double price = Double.parseDouble(priceText);
+            if (price <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Product price must be greater than 0!",
+                        "Invalid Price",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
 
             int categoryId = cbCategory.getSelectedIndex() + 1;
 
@@ -195,7 +204,12 @@ public class AddProductDialog extends javax.swing.JDialog {
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to save product. Please check your input values.",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 

@@ -1,5 +1,7 @@
 package ui.dialogs;
 
+import javax.swing.JOptionPane;
+
 public class AddSupplierDialog extends javax.swing.JDialog {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddSupplierDialog.class.getName());
@@ -127,6 +129,16 @@ public class AddSupplierDialog extends javax.swing.JDialog {
 
         if (company.isEmpty() || contactNo.isEmpty() || address.isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Please fill in all supplier fields.", "Validation Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (!contactNo.matches("\\d+")) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Phone number must contain numbers only!",
+                    "Invalid Phone Number",
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 

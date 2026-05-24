@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import database.DBConnection;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import ui.auth.LoginPanel;
@@ -86,12 +87,27 @@ public class POSPanel extends javax.swing.JPanel {
                         if (input != null && !input.trim().isEmpty()) {
                             try {
                                 int newQty = Integer.parseInt(input.trim());
-                                if (newQty > 0) {
-                                    model.setValueAt(newQty, row, 2);
-                                    model.setValueAt(newQty * unitPrice, row, 4);
-                                    updateTotal();
+                                if (newQty <= 0) {
+                                    JOptionPane.showMessageDialog(
+                                            POSPanel.this,
+                                            "Quantity must be greater than 0!",
+                                            "Invalid Quantity",
+                                            JOptionPane.WARNING_MESSAGE
+                                    );
+                                    return;
                                 }
+
+                                model.setValueAt(newQty, row, 2);
+                                model.setValueAt(newQty * unitPrice, row, 4);
+                                updateTotal();
+
                             } catch (NumberFormatException ex) {
+                                JOptionPane.showMessageDialog(
+                                        POSPanel.this,
+                                        "Please enter numbers only for quantity!",
+                                        "Input Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
                             }
                         }
                     } else if (col == 3) {
@@ -150,7 +166,7 @@ public class POSPanel extends javax.swing.JPanel {
             Connection conn = DBConnection.getConnection();
 
             StringBuilder sql = new StringBuilder(
-                    "SELECT p.product_id, p.name, p.price, p.image_path " 
+                    "SELECT p.product_id, p.name, p.price, p.image_path "
                     + "FROM Products p "
                     + "INNER JOIN Categories c ON p.category_id = c.category_id "
                     + "WHERE p.is_archived = 0 "
