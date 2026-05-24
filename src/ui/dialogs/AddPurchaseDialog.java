@@ -1,5 +1,7 @@
 package ui.dialogs;
 
+import javax.swing.JOptionPane;
+
 public class AddPurchaseDialog extends javax.swing.JDialog {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddPurchaseDialog.class.getName());
@@ -253,9 +255,25 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
                 conn.setAutoCommit(true);
             }
 
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter valid numbers for quantity and cost.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Input Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to save purchase. Please try again.",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 

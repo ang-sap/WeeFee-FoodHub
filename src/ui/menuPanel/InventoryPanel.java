@@ -212,7 +212,7 @@ public class InventoryPanel extends javax.swing.JPanel {
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Export to CSV");
-        fileChooser.setSelectedFile(new java.io.File("SalesReport.csv"));
+        fileChooser.setSelectedFile(new java.io.File("InventoryStockReport.csv"));
 
         int userSelection = fileChooser.showSaveDialog(this);
 
