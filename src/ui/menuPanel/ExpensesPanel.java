@@ -1,56 +1,141 @@
 package ui.menuPanel;
 
+// Imports Swing constants for table alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports LoginPanel to get logged-in user ID
 import ui.auth.LoginPanel;
 
 public class ExpensesPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when ExpensesPanel is created
     public ExpensesPanel() {
+
+        // Initializes all UI components
         initComponents();
 
-        tblExpenses.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10));
-        tblExpenses.getTableHeader().setBackground(new java.awt.Color(245, 245, 245));
-        tblExpenses.getTableHeader().setForeground(new java.awt.Color(80, 80, 80));
-        tblExpenses.setIntercellSpacing(new java.awt.Dimension(0, 0));
-        tblExpenses.setShowGrid(false);
-        tblExpenses.setRowHeight(35);
-        
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Styles the table header font
+        tblExpenses.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
+        );
 
+        // Changes table header background color
+        tblExpenses.getTableHeader().setBackground(
+                new java.awt.Color(245, 245, 245)
+        );
+
+        // Changes table header text color
+        tblExpenses.getTableHeader().setForeground(
+                new java.awt.Color(80, 80, 80)
+        );
+
+        // Removes spacing between table cells
+        tblExpenses.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
+        tblExpenses.setShowGrid(false);
+
+        // Sets row height
+        tblExpenses.setRowHeight(35);
+
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblExpenses.getColumnCount(); i++) {
-            tblExpenses.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblExpenses.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
+        // Loads expense records into table
         loadExpenses();
     }
 
+    // Loads expense records from database
     public void loadExpenses() {
-        String sql = "SELECT expense_id, date_paid, category, amount, status, description FROM Expenses ORDER BY expense_id DESC";
 
-        try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql); java.sql.ResultSet rs = pstmt.executeQuery()) {
+        // SQL query for retrieving expense records
+        String sql
+                = "SELECT expense_id, "
+                + "date_paid, "
+                + "category, "
+                + "amount, "
+                + "status, "
+                + "description "
+                + "FROM Expenses "
+                + "ORDER BY expense_id DESC";
 
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblExpenses.getModel();
+        try (
+                // Connects to database
+                java.sql.Connection conn
+                = database.DBConnection.getConnection(); // Creates PreparedStatement
+                 java.sql.PreparedStatement pstmt
+                = conn.prepareStatement(sql); // Executes SELECT query
+                 java.sql.ResultSet rs
+                = pstmt.executeQuery()) {
+
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel) tblExpenses.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a");
+            // Date format for displaying expense date
+            java.text.SimpleDateFormat sdf
+                    = new java.text.SimpleDateFormat(
+                            "MMM dd, yyyy - hh:mm a"
+                    );
 
+            // Loops through database records
             while (rs.next()) {
+
+                // Adds row into table
                 model.addRow(new Object[]{
                     rs.getInt("expense_id"),
-                    sdf.format(rs.getTimestamp("date_paid")),
+                    // Formats date and time
+                    sdf.format(
+                    rs.getTimestamp("date_paid")
+                    ),
                     rs.getString("category"),
                     rs.getDouble("amount"),
                     rs.getString("status"),
-                    rs.getString("description") == null ? "" : rs.getString("description")
+                    // Displays blank if description is null
+                    rs.getString("description") == null
+                    ? ""
+                    : rs.getString("description")
                 });
             }
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading expenses: " + e.getMessage());
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading expenses: "
+                    + e.getMessage()
+            );
         }
     }
 
@@ -168,63 +253,168 @@ public class ExpensesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRecordExpenseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecordExpenseActionPerformed
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
 
-        ui.dialogs.AddExpenseDialog dialog = new ui.dialogs.AddExpenseDialog(parentFrame, true);
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens AddExpenseDialog
+        ui.dialogs.AddExpenseDialog dialog
+                = new ui.dialogs.AddExpenseDialog(
+                        parentFrame,
+                        true
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated expense records
         loadExpenses();
     }//GEN-LAST:event_btnRecordExpenseActionPerformed
 
     private void btnVoidExpenseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoidExpenseActionPerformed
-        int selectedRow = tblExpenses.getSelectedRow();
+        // Gets selected row in table
+        int selectedRow
+                = tblExpenses.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select an expense record to void.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an expense record to void.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int expenseId = (int) tblExpenses.getValueAt(selectedRow, 0);
-        String currentStatus = (String) tblExpenses.getValueAt(selectedRow, 4);
+        // Gets selected expense ID
+        int expenseId
+                = (int) tblExpenses.getValueAt(
+                        selectedRow,
+                        0
+                );
 
+        // Gets current expense status
+        String currentStatus
+                = (String) tblExpenses.getValueAt(
+                        selectedRow,
+                        4
+                );
+
+        // Validation:
+        // Checks if expense is already cancelled
         if ("Cancelled".equalsIgnoreCase(currentStatus)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "This expense record has already been voided.", "Information", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "This expense record has already been voided.",
+                    "Information",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
+
             return;
         }
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to void Expense Record #" + expenseId + "?",
-                "Confirm Void",
-                javax.swing.JOptionPane.YES_NO_OPTION,
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Confirmation dialog
+        int confirm
+                = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to void Expense Record #"
+                        + expenseId + "?",
+                        "Confirm Void",
+                        javax.swing.JOptionPane.YES_NO_OPTION,
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
 
+        // Runs if user clicks YES
         if (confirm == javax.swing.JOptionPane.YES_OPTION) {
 
-            try (java.sql.Connection conn = database.DBConnection.getConnection()) {
+            try (
+                    // Connects to database
+                    java.sql.Connection conn
+                    = database.DBConnection.getConnection()) {
 
-                String sql = "UPDATE Expenses SET status = 'Cancelled' WHERE expense_id = ?";
+                // SQL query for cancelling expense
+                String sql
+                        = "UPDATE Expenses "
+                        + "SET status = 'Cancelled' "
+                        + "WHERE expense_id = ?";
 
-                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                try (
+                        // Creates PreparedStatement
+                        java.sql.PreparedStatement pstmt
+                        = conn.prepareStatement(sql)) {
+
+                    // Selects correct expense ID
                     pstmt.setInt(1, expenseId);
+
+                    // Executes UPDATE query
                     pstmt.executeUpdate();
                 }
 
-                String logSql = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'VOID_EXPENSE', ?)";
+                // SQL query for Audit Log
+                String logSql
+                        = "INSERT INTO AuditLogs "
+                        + "(user_id, action, description) "
+                        + "VALUES (?, 'VOID_EXPENSE', ?)";
 
-                try (java.sql.PreparedStatement logStmt = conn.prepareStatement(logSql)) {
-                    logStmt.setInt(1, LoginPanel.loggedInUserId);
-                    logStmt.setString(2, "Voided expense entry ID: " + expenseId);
+                try (
+                        // Creates PreparedStatement
+                        java.sql.PreparedStatement logStmt
+                        = conn.prepareStatement(logSql)) {
+
+                    // Inserts logged-in user ID
+                    logStmt.setInt(
+                            1,
+                            LoginPanel.loggedInUserId
+                    );
+
+                    // Inserts audit description
+                    logStmt.setString(
+                            2,
+                            "Voided expense entry ID: "
+                            + expenseId
+                    );
+
+                    // Executes INSERT query
                     logStmt.executeUpdate();
                 }
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Expense entry marked as Cancelled.");
+                // Success message
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Expense entry marked as Cancelled."
+                );
+
+                // Reloads updated expense records
                 loadExpenses();
 
             } catch (Exception e) {
+
+                // Prints error in console
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+                // Shows database/system error
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Database Error: "
+                        + e.getMessage(),
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }//GEN-LAST:event_btnVoidExpenseActionPerformed

@@ -1,77 +1,169 @@
 package ui.menuPanel;
 
+// Imports popup message dialogs
 import javax.swing.JOptionPane;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports Swing constants for alignment
 import javax.swing.SwingConstants;
+
+// Imports AddProduct dialog
 import ui.dialogs.AddProductDialog;
+
+// Imports LoginPanel to get logged-in user ID
 import ui.auth.LoginPanel;
 
 public class ProductsPanel extends javax.swing.JPanel {
 
+    // Stores selected product ID
     private int productId;
 
+    // Constructor
+    // Runs when ProductsPanel is created
     public ProductsPanel() {
+
+        // Initializes all UI components
         initComponents();
+
+        // Loads products into table
         loadProducts("");
 
+        // Styles the table header font
         tblProducts.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 11)
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        11
+                )
         );
+
+        // Changes table header background color
         tblProducts.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblProducts.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblProducts.setIntercellSpacing(new java.awt.Dimension(0, 0));
+
+        // Removes spacing between table cells
+        tblProducts.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
         tblProducts.setShowGrid(false);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
 
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblProducts.getColumnCount(); i++) {
-            tblProducts.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblProducts.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
     }
 
+    // Loads product records from database
     public void loadProducts(String searchQuery) {
-        boolean showArchived = chkShowArchived.isSelected();
+
+        // Checks if archived products should be shown
+        boolean showArchived
+                = chkShowArchived.isSelected();
+
+        // Stores SQL query
         String sql;
 
+        // ================= ARCHIVED PRODUCTS VIEW =================
         if (showArchived) {
-            sql = "SELECT p.product_id, p.name AS product_name, c.category_name, p.price, ISNULL(i.current_stock, 0) AS current_stock "
+
+            // SQL query:
+            // Gets archived products only
+            sql = "SELECT p.product_id, "
+                    + "p.name AS product_name, "
+                    + "c.category_name, "
+                    + "p.price, "
+                    + "ISNULL(i.current_stock, 0) "
+                    + "AS current_stock "
                     + "FROM Products p "
-                    + "JOIN Categories c ON p.category_id = c.category_id "
-                    + "LEFT JOIN Inventory i ON p.product_id = i.product_id "
-                    + "WHERE p.is_archived = 1 AND (p.name LIKE ? OR c.category_name LIKE ?) "
+                    + "JOIN Categories c "
+                    + "ON p.category_id = c.category_id "
+                    + "LEFT JOIN Inventory i "
+                    + "ON p.product_id = i.product_id "
+                    + "WHERE p.is_archived = 1 "
+                    + "AND (p.name LIKE ? "
+                    + "OR c.category_name LIKE ?) "
                     + "ORDER BY p.name ASC";
+
+            // ================= ACTIVE PRODUCTS VIEW =================
         } else {
-            sql = "SELECT product_id, product_name, category_name, price, current_stock "
+
+            // SQL query:
+            // Gets active products using SQL View
+            sql = "SELECT product_id, "
+                    + "product_name, "
+                    + "category_name, "
+                    + "price, "
+                    + "current_stock "
                     + "FROM vw_ProductList "
-                    + "WHERE product_name LIKE ? OR category_name LIKE ? "
+                    + "WHERE product_name LIKE ? "
+                    + "OR category_name LIKE ? "
                     + "ORDER BY product_name ASC";
         }
 
-        try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (
+                // Connects to database
+                java.sql.Connection conn
+                = database.DBConnection.getConnection(); // Creates PreparedStatement
+                 java.sql.PreparedStatement pstmt
+                = conn.prepareStatement(sql)) {
 
-            String searchParam = "%" + searchQuery.trim() + "%";
+            // Adds wildcard search filter
+            String searchParam
+                    = "%" + searchQuery.trim() + "%";
+
+            // Inserts search parameter
             pstmt.setString(1, searchParam);
             pstmt.setString(2, searchParam);
 
-            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblProducts.getModel();
+            try (
+                    // Executes SELECT query
+                    java.sql.ResultSet rs
+                    = pstmt.executeQuery()) {
+
+                // Gets table model
+                javax.swing.table.DefaultTableModel model
+                        = (javax.swing.table.DefaultTableModel) tblProducts.getModel();
+
+                // Clears existing rows
                 model.setRowCount(0);
 
+                // Loops through product records
                 while (rs.next()) {
+
+                    // Adds row into table
                     model.addRow(new Object[]{
                         rs.getInt("product_id"),
                         rs.getString("product_name"),
                         rs.getString("category_name"),
-                        rs.getDouble("price"),
-                    });
+                        rs.getDouble("price"),});
                 }
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
         }
     }
@@ -210,95 +302,283 @@ public class ProductsPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
 
-        AddProductDialog dialog = new AddProductDialog(parentFrame, true);
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens AddProductDialog
+        AddProductDialog dialog
+                = new AddProductDialog(
+                        parentFrame,
+                        true
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated product records
         loadProducts("");
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArchiveActionPerformed
-        int selectedRow = tblProducts.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblProducts.getSelectedRow();
+
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a product first.");
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a product first."
+            );
+
             return;
         }
 
-        int productId = (int) tblProducts.getValueAt(selectedRow, 0);
-        String productName = (String) tblProducts.getValueAt(selectedRow, 1);
+        // Gets selected product ID
+        int productId
+                = (int) tblProducts.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        boolean isArchivedView = chkShowArchived.isSelected();
-        String actionWord = isArchivedView ? "restore" : "archive";
-        String logAction = isArchivedView ? "RESTORE_PRODUCT" : "ARCHIVE_PRODUCT";
-        int newArchiveStatus = isArchivedView ? 0 : 1;
+        // Gets selected product name
+        String productName
+                = (String) tblProducts.getValueAt(
+                        selectedRow,
+                        1
+                );
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to " + actionWord + " '" + productName + "'?",
-                "Confirm Action",
-                javax.swing.JOptionPane.YES_NO_OPTION);
+        // Checks if currently viewing archived products
+        boolean isArchivedView
+                = chkShowArchived.isSelected();
 
-        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-            try (java.sql.Connection conn = database.DBConnection.getConnection()) {
+        // Determines action text
+        String actionWord
+                = isArchivedView
+                        ? "restore"
+                        : "archive";
 
-                String sql = "UPDATE Products SET is_archived = ? WHERE product_id = ?";
-                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Determines audit log action
+        String logAction
+                = isArchivedView
+                        ? "RESTORE_PRODUCT"
+                        : "ARCHIVE_PRODUCT";
+
+        // Determines archive status value
+        int newArchiveStatus
+                = isArchivedView
+                        ? 0
+                        : 1;
+
+        // Confirmation dialog
+        int confirm
+                = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to "
+                        + actionWord
+                        + " '"
+                        + productName
+                        + "'?",
+                        "Confirm Action",
+                        javax.swing.JOptionPane.YES_NO_OPTION
+                );
+
+        // Runs if user clicks YES
+        if (confirm
+                == javax.swing.JOptionPane.YES_OPTION) {
+
+            try (
+                    // Connects to database
+                    java.sql.Connection conn
+                    = database.DBConnection.getConnection()) {
+
+                // ================= PRODUCT ARCHIVE UPDATE =================
+                // SQL query:
+                // Updates archive status
+                String sql
+                        = "UPDATE Products "
+                        + "SET is_archived = ? "
+                        + "WHERE product_id = ?";
+
+                try (
+                        // Creates PreparedStatement
+                        java.sql.PreparedStatement pstmt
+                        = conn.prepareStatement(sql)) {
+
+                    // Updates archive status
                     pstmt.setInt(1, newArchiveStatus);
+
+                    // Selects correct product
                     pstmt.setInt(2, productId);
+
+                    // Executes UPDATE query
                     pstmt.executeUpdate();
                 }
 
-                String logSql = "{call sp_InsertAuditLog(?, ?, ?)}";
-                try (java.sql.CallableStatement cstmtLog = conn.prepareCall(logSql)) {
-                    cstmtLog.setInt(1, LoginPanel.loggedInUserId);
-                    cstmtLog.setString(2, logAction);
-                    cstmtLog.setString(3, actionWord.substring(0, 1).toUpperCase() + actionWord.substring(1) + "d Product ID: " + productId);
+                // ================= AUDIT LOG =================
+                // SQL query:
+                // Calls stored procedure for audit logs
+                String logSql
+                        = "{call sp_InsertAuditLog(?, ?, ?)}";
+
+                try (
+                        // Creates CallableStatement
+                        java.sql.CallableStatement cstmtLog
+                        = conn.prepareCall(logSql)) {
+
+                    // Inserts logged-in user ID
+                    cstmtLog.setInt(
+                            1,
+                            LoginPanel.loggedInUserId
+                    );
+
+                    // Inserts action type
+                    cstmtLog.setString(
+                            2,
+                            logAction
+                    );
+
+                    // Inserts audit description
+                    cstmtLog.setString(
+                            3,
+                            actionWord.substring(0, 1)
+                                    .toUpperCase()
+                            + actionWord.substring(1)
+                            + "d Product ID: "
+                            + productId
+                    );
+
+                    // Executes stored procedure
                     cstmtLog.execute();
                 }
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Product " + actionWord + "d successfully.");
+                // Success message
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Product "
+                        + actionWord
+                        + "d successfully."
+                );
 
+                // Reloads updated product records
                 loadProducts("");
 
             } catch (Exception e) {
+
+                // Prints error in console
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Error processing request: " + e.getMessage());
+
+                // Shows database/system error
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Error processing request: "
+                        + e.getMessage()
+                );
             }
         }
     }//GEN-LAST:event_btnArchiveActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        int selectedRow = tblProducts.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblProducts.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a product to edit first.", "No Selection", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a product to edit first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int id = (int) tblProducts.getValueAt(selectedRow, 0);
-        String name = (String) tblProducts.getValueAt(selectedRow, 1);
-        String category = (String) tblProducts.getValueAt(selectedRow, 2);
-        double price = (double) tblProducts.getValueAt(selectedRow, 3);
+        // Gets selected product information
+        int id
+                = (int) tblProducts.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        String name
+                = (String) tblProducts.getValueAt(
+                        selectedRow,
+                        1
+                );
 
-        ui.dialogs.EditProductDialog dialog = new ui.dialogs.EditProductDialog(parentFrame, true, id, name, category, price);
+        String category
+                = (String) tblProducts.getValueAt(
+                        selectedRow,
+                        2
+                );
+
+        double price
+                = (double) tblProducts.getValueAt(
+                        selectedRow,
+                        3
+                );
+
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
+
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens EditProductDialog
+        ui.dialogs.EditProductDialog dialog
+                = new ui.dialogs.EditProductDialog(
+                        parentFrame,
+                        true,
+                        id,
+                        name,
+                        category,
+                        price
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated product records
         loadProducts("");
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void chkShowArchivedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowArchivedActionPerformed
+        // Changes button text based on checkbox state
         if (chkShowArchived.isSelected()) {
+
             btnArchive.setText("Restore");
+
         } else {
+
             btnArchive.setText("Archive");
         }
 
+        // Reloads products based on selected view
         loadProducts("");
     }//GEN-LAST:event_chkShowArchivedActionPerformed
 

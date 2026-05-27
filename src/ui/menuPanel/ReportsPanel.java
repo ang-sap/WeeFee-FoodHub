@@ -1,36 +1,80 @@
 package ui.menuPanel;
 
+// Imports file chooser for exporting files
 import javax.swing.JFileChooser;
+
+// Imports popup message dialogs
 import javax.swing.JOptionPane;
+
+// Imports Swing constants for alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class ReportsPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when ReportsPanel is created
     public ReportsPanel() {
-        initComponents();
-        
-        txtStartDate.putClientProperty("JTextField.placeholderText", "yyyy-mm-dd");
-        txtEndDate.putClientProperty("JTextField.placeholderText", "yyyy-mm-dd");
 
-        tblReports.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+        // Initializes all UI components
+        initComponents();
+
+        // Placeholder text for start date field
+        txtStartDate.putClientProperty(
+                "JTextField.placeholderText",
+                "yyyy-mm-dd"
         );
+
+        // Placeholder text for end date field
+        txtEndDate.putClientProperty(
+                "JTextField.placeholderText",
+                "yyyy-mm-dd"
+        );
+
+        // Styles the table header font
+        tblReports.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
+        );
+
+        // Changes table header background color
         tblReports.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblReports.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblReports.setIntercellSpacing(new java.awt.Dimension(0, 0));
-        tblReports.setShowGrid(false);
-        
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Removes spacing between table cells
+        tblReports.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
+        tblReports.setShowGrid(false);
+
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblReports.getColumnCount(); i++) {
-            tblReports.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblReports.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
     }
 
@@ -354,101 +398,268 @@ public class ReportsPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_txtStartDateActionPerformed
 
     private void btnGenerateReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateReportActionPerformed
-        String startDateStr = txtStartDate.getText().trim();
-        String endDateStr = txtEndDate.getText().trim();
+        // Gets start date input
+        String startDateStr
+                = txtStartDate.getText().trim();
 
+        // Gets end date input
+        String endDateStr
+                = txtEndDate.getText().trim();
+
+        // Validation:
+        // Uses default old date if start date is empty
         if (startDateStr.isEmpty()) {
+
             startDateStr = "2000-01-01";
         }
+
+        // Validation:
+        // Uses far future date if end date is empty
         if (endDateStr.isEmpty()) {
+
             endDateStr = "2100-12-31";
         }
 
-        String startQuery = startDateStr + " 00:00:00";
-        String endQuery = endDateStr + " 23:59:59";
+        // Adds time for full-day query
+        String startQuery
+                = startDateStr + " 00:00:00";
+
+        String endQuery
+                = endDateStr + " 23:59:59";
 
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sqlRevenue = "SELECT ISNULL(SUM(total_amount), 0) AS gross_revenue FROM Transactions "
-                    + "WHERE status != 'Voided' AND transaction_date >= ? AND transaction_date <= ?";
-            java.sql.PreparedStatement pstmtRev = conn.prepareStatement(sqlRevenue);
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // ================= GROSS REVENUE =================
+            // SQL query:
+            // Gets total sales revenue
+            String sqlRevenue
+                    = "SELECT ISNULL(SUM(total_amount), 0) "
+                    + "AS gross_revenue "
+                    + "FROM Transactions "
+                    + "WHERE status != 'Voided' "
+                    + "AND transaction_date >= ? "
+                    + "AND transaction_date <= ?";
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtRev
+                    = conn.prepareStatement(sqlRevenue);
+
+            // Inserts start date
             pstmtRev.setString(1, startQuery);
+
+            // Inserts end date
             pstmtRev.setString(2, endQuery);
-            java.sql.ResultSet rsRev = pstmtRev.executeQuery();
 
+            // Executes SELECT query
+            java.sql.ResultSet rsRev
+                    = pstmtRev.executeQuery();
+
+            // Stores total revenue
             double grossRevenue = 0.0;
+
+            // Gets query result
             if (rsRev.next()) {
-                grossRevenue = rsRev.getDouble("gross_revenue");
+
+                grossRevenue
+                        = rsRev.getDouble("gross_revenue");
             }
 
-            String sqlExp = "SELECT ISNULL(SUM(amount), 0) AS total_exp FROM Expenses "
-                    + "WHERE status != 'Cancelled' AND date_paid >= ? AND date_paid <= ?";
-            java.sql.PreparedStatement pstmtExp = conn.prepareStatement(sqlExp);
+            // ================= OPERATING EXPENSES =================
+            // SQL query:
+            // Gets total operational expenses
+            String sqlExp
+                    = "SELECT ISNULL(SUM(amount), 0) "
+                    + "AS total_exp "
+                    + "FROM Expenses "
+                    + "WHERE status != 'Cancelled' "
+                    + "AND date_paid >= ? "
+                    + "AND date_paid <= ?";
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtExp
+                    = conn.prepareStatement(sqlExp);
+
+            // Inserts start date
             pstmtExp.setString(1, startQuery);
+
+            // Inserts end date
             pstmtExp.setString(2, endQuery);
-            java.sql.ResultSet rsExp = pstmtExp.executeQuery();
+
+            // Executes SELECT query
+            java.sql.ResultSet rsExp
+                    = pstmtExp.executeQuery();
+
+            // Stores operational expenses
             double opsExpenses = 0.0;
+
+            // Gets query result
             if (rsExp.next()) {
-                opsExpenses = rsExp.getDouble("total_exp");
+
+                opsExpenses
+                        = rsExp.getDouble("total_exp");
             }
 
-            String sqlPurch = "SELECT ISNULL(SUM(pd.quantity_bought * pd.cost_price), 0) AS total_purch "
-                    + "FROM Purchases p JOIN Purchase_Details pd ON p.purchase_id = pd.purchase_id "
-                    + "WHERE p.status != 'Cancelled' AND p.purchase_date >= ? AND p.purchase_date <= ?";
-            java.sql.PreparedStatement pstmtPurch = conn.prepareStatement(sqlPurch);
+            // ================= PURCHASE COSTS =================
+            // SQL query:
+            // Gets total purchase/restocking costs
+            String sqlPurch
+                    = "SELECT ISNULL(SUM(pd.quantity_bought "
+                    + "* pd.cost_price), 0) "
+                    + "AS total_purch "
+                    + "FROM Purchases p "
+                    + "JOIN Purchase_Details pd "
+                    + "ON p.purchase_id = pd.purchase_id "
+                    + "WHERE p.status != 'Cancelled' "
+                    + "AND p.purchase_date >= ? "
+                    + "AND p.purchase_date <= ?";
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtPurch
+                    = conn.prepareStatement(sqlPurch);
+
+            // Inserts start date
             pstmtPurch.setString(1, startQuery);
+
+            // Inserts end date
             pstmtPurch.setString(2, endQuery);
-            java.sql.ResultSet rsPurch = pstmtPurch.executeQuery();
+
+            // Executes SELECT query
+            java.sql.ResultSet rsPurch
+                    = pstmtPurch.executeQuery();
+
+            // Stores restocking costs
             double restockCosts = 0.0;
+
+            // Gets query result
             if (rsPurch.next()) {
-                restockCosts = rsPurch.getDouble("total_purch");
+
+                restockCosts
+                        = rsPurch.getDouble("total_purch");
             }
 
-            double totalOutflow = opsExpenses + restockCosts;
+            // Calculates total business expenses
+            double totalOutflow
+                    = opsExpenses + restockCosts;
 
-            double netProfit = grossRevenue - totalOutflow;
+            // Calculates net profit
+            double netProfit
+                    = grossRevenue - totalOutflow;
 
-            lblTotalRevenue.setText(String.format("%,.2f", grossRevenue));
-            lblTotalExpenses.setText(String.format("%,.2f", totalOutflow));
-            lblNetProfit.setText(String.format("%,.2f", netProfit));
+            // Displays total revenue
+            lblTotalRevenue.setText(
+                    String.format(
+                            "%,.2f",
+                            grossRevenue
+                    )
+            );
 
+            // Displays total expenses
+            lblTotalExpenses.setText(
+                    String.format(
+                            "%,.2f",
+                            totalOutflow
+                    )
+            );
+
+            // Displays net profit
+            lblNetProfit.setText(
+                    String.format(
+                            "%,.2f",
+                            netProfit
+                    )
+            );
+
+            // Changes profit text color
             if (netProfit < 0) {
-                lblNetProfit.setForeground(new java.awt.Color(220, 38, 38)); // Red
+
+                // Red if loss
+                lblNetProfit.setForeground(
+                        new java.awt.Color(220, 38, 38)
+                );
+
             } else {
-                lblNetProfit.setForeground(new java.awt.Color(15, 23, 42));  // Dark Blue/Black
+
+                // Dark color if profit
+                lblNetProfit.setForeground(
+                        new java.awt.Color(15, 23, 42)
+                );
             }
 
-            String sqlTopItems = "SELECT p.name, SUM(td.quantity) AS total_qty, SUM(td.quantity * td.selling_price) AS total_sales "
+            // ================= TOP SELLING PRODUCTS =================
+            // SQL query:
+            // Gets best-selling products
+            String sqlTopItems
+                    = "SELECT p.name, "
+                    + "SUM(td.quantity) AS total_qty, "
+                    + "SUM(td.quantity * td.selling_price) "
+                    + "AS total_sales "
                     + "FROM Transaction_Details td "
-                    + "JOIN Transactions t ON td.transaction_id = t.transaction_id "
-                    + "JOIN Products p ON td.product_id = p.product_id "
-                    + "WHERE t.status != 'Voided' AND t.transaction_date >= ? AND t.transaction_date <= ? "
+                    + "JOIN Transactions t "
+                    + "ON td.transaction_id = t.transaction_id "
+                    + "JOIN Products p "
+                    + "ON td.product_id = p.product_id "
+                    + "WHERE t.status != 'Voided' "
+                    + "AND t.transaction_date >= ? "
+                    + "AND t.transaction_date <= ? "
                     + "GROUP BY p.name "
                     + "ORDER BY total_sales DESC";
 
-            java.sql.PreparedStatement pstmtTop = conn.prepareStatement(sqlTopItems);
-            pstmtTop.setString(1, startQuery);
-            pstmtTop.setString(2, endQuery);
-            java.sql.ResultSet rsTop = pstmtTop.executeQuery();
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtTop
+                    = conn.prepareStatement(sqlTopItems);
 
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblReports.getModel();
+            // Inserts start date
+            pstmtTop.setString(1, startQuery);
+
+            // Inserts end date
+            pstmtTop.setString(2, endQuery);
+
+            // Executes SELECT query
+            java.sql.ResultSet rsTop
+                    = pstmtTop.executeQuery();
+
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel) tblReports.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
+            // Ranking counter
             int rank = 1;
+
+            // Loops through top-selling products
             while (rsTop.next()) {
+
+                // Adds row into table
                 model.addRow(new Object[]{
                     rank,
                     rsTop.getString("name"),
                     rsTop.getInt("total_qty"),
                     rsTop.getDouble("total_sales")
                 });
+
+                // Increases rank number
                 rank++;
             }
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error generating report: " + e.getMessage(), "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error generating report: "
+                    + e.getMessage(),
+                    "Database Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnGenerateReportActionPerformed
 
@@ -457,44 +668,123 @@ public class ReportsPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_txtEndDateActionPerformed
 
     private void ExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportActionPerformed
+        // Validation:
+        // Checks if table has data
         if (tblReports.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "There is no data to export!", "Export Error", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "There is no data to export!",
+                    "Export Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Export to CSV");
-        fileChooser.setSelectedFile(new java.io.File("FinancialReport.csv"));
+        // Creates file chooser window
+        JFileChooser fileChooser
+                = new JFileChooser();
 
-        int userSelection = fileChooser.showSaveDialog(this);
+        // Dialog title
+        fileChooser.setDialogTitle(
+                "Export to CSV"
+        );
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            java.io.File fileToSave = fileChooser.getSelectedFile();
-            
-            try (java.io.FileWriter fw = new java.io.FileWriter(fileToSave); java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+        // Default file name
+        fileChooser.setSelectedFile(
+                new java.io.File(
+                        "FinancialReport.csv"
+                )
+        );
 
-                for (int i = 0; i < tblReports.getColumnCount(); i++) {
-                    bw.write(tblReports.getColumnName(i) + ",");
+        // Opens Save File dialog
+        int userSelection
+                = fileChooser.showSaveDialog(this);
+
+        // Runs if user clicks Save
+        if (userSelection
+                == JFileChooser.APPROVE_OPTION) {
+
+            // Gets selected file path
+            java.io.File fileToSave
+                    = fileChooser.getSelectedFile();
+
+            try (
+                    // Creates FileWriter
+                    java.io.FileWriter fw
+                    = new java.io.FileWriter(fileToSave); // Creates BufferedWriter
+                     java.io.BufferedWriter bw
+                    = new java.io.BufferedWriter(fw)) {
+
+                // ================= EXPORT COLUMN HEADERS =================
+                for (int i = 0;
+                        i < tblReports.getColumnCount();
+                        i++) {
+
+                    // Writes column names into CSV
+                    bw.write(
+                            tblReports.getColumnName(i)
+                            + ","
+                    );
                 }
-                bw.newLine(); 
 
-                for (int i = 0; i < tblReports.getRowCount(); i++) {
-                    for (int j = 0; j < tblReports.getColumnCount(); j++) {
-                        Object cellValue = tblReports.getValueAt(i, j);
+                // Moves to next line
+                bw.newLine();
 
+                // ================= EXPORT TABLE DATA =================
+                for (int i = 0;
+                        i < tblReports.getRowCount();
+                        i++) {
+
+                    for (int j = 0;
+                            j < tblReports.getColumnCount();
+                            j++) {
+
+                        // Gets cell value
+                        Object cellValue
+                                = tblReports.getValueAt(i, j);
+
+                        // Checks if value exists
                         if (cellValue != null) {
-                            bw.write(cellValue.toString().replace(",", "") + ",");
+
+                            // Removes commas to avoid CSV errors
+                            bw.write(
+                                    cellValue.toString()
+                                            .replace(",", "")
+                                    + ","
+                            );
+
                         } else {
+
+                            // Writes blank value
                             bw.write(",");
                         }
                     }
-                    bw.newLine(); 
+
+                    // Moves to next row
+                    bw.newLine();
                 }
 
-                JOptionPane.showMessageDialog(this, "Data successfully exported to:\n" + fileToSave.getAbsolutePath(), "Export Success", JOptionPane.INFORMATION_MESSAGE);
+                // Success message
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Data successfully exported to:\n"
+                        + fileToSave.getAbsolutePath(),
+                        "Export Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error exporting file: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+
+                // Shows export error
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Error exporting file: "
+                        + e.getMessage(),
+                        "Export Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }//GEN-LAST:event_ExportActionPerformed

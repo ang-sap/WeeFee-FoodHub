@@ -1,69 +1,149 @@
 package ui.menuPanel;
 
+// Imports Swing constants for alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports LoginPanel to get logged-in user ID
 import ui.auth.LoginPanel;
 
 public class SuppliersPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when SuppliersPanel is created
     public SuppliersPanel() {
+
+        // Initializes all UI components
         initComponents();
 
+        // Styles the table header font
         tblSuppliers.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
         );
+
+        // Changes table header background color
         tblSuppliers.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblSuppliers.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblSuppliers.setIntercellSpacing(new java.awt.Dimension(0, 0));
+
+        // Removes spacing between table cells
+        tblSuppliers.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
         tblSuppliers.setShowGrid(false);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
 
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblSuppliers.getColumnCount(); i++) {
-            tblSuppliers.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblSuppliers.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
+        // Loads supplier records into table
         loadSuppliers("");
     }
 
+    // Loads supplier records from database
     public void loadSuppliers(String searchQuery) {
-        boolean showArchived = chkShowArchived.isSelected();
-        int archiveFlag = showArchived ? 1 : 0;
 
-        String sql = "SELECT supplier_id, supplier_name, contact_no, address "
+        // Checks if archived suppliers should be shown
+        boolean showArchived
+                = chkShowArchived.isSelected();
+
+        // Determines archive flag value
+        int archiveFlag
+                = showArchived ? 1 : 0;
+
+        // SQL query:
+        // Gets suppliers based on archive status
+        String sql
+                = "SELECT supplier_id, "
+                + "supplier_name, "
+                + "contact_no, "
+                + "address "
                 + "FROM Suppliers "
-                + "WHERE is_archived = ? AND (supplier_name LIKE ? OR address LIKE ?) "
+                + "WHERE is_archived = ? "
+                + "AND (supplier_name LIKE ? "
+                + "OR address LIKE ?) "
                 + "ORDER BY supplier_id DESC";
 
-        try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (
+                // Connects to database
+                java.sql.Connection conn
+                = database.DBConnection.getConnection(); // Creates PreparedStatement
+                 java.sql.PreparedStatement pstmt
+                = conn.prepareStatement(sql)) {
 
-            String searchParam = "%" + searchQuery.trim() + "%";
+            // Adds wildcard search filter
+            String searchParam
+                    = "%" + searchQuery.trim() + "%";
 
+            // Inserts archive filter
             pstmt.setInt(1, archiveFlag);
+
+            // Inserts search parameter
             pstmt.setString(2, searchParam);
             pstmt.setString(3, searchParam);
 
-            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblSuppliers.getModel();
+            try (
+                    // Executes SELECT query
+                    java.sql.ResultSet rs
+                    = pstmt.executeQuery()) {
+
+                // Gets table model
+                javax.swing.table.DefaultTableModel model
+                        = (javax.swing.table.DefaultTableModel) tblSuppliers.getModel();
+
+                // Clears existing rows
                 model.setRowCount(0);
 
+                // Loops through supplier records
                 while (rs.next()) {
+
+                    // Adds row into table
                     model.addRow(new Object[]{
                         rs.getInt("supplier_id"),
                         rs.getString("supplier_name"),
-                        rs.getString("address"), 
-                        rs.getString("contact_no") 
+                        rs.getString("address"),
+                        rs.getString("contact_no")
                     });
                 }
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading suppliers: " + e.getMessage());
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading suppliers: "
+                    + e.getMessage()
+            );
         }
     }
 
@@ -118,7 +198,7 @@ public class SuppliersPanel extends javax.swing.JPanel {
         btnArchive.setBackground(new java.awt.Color(254, 226, 226));
         btnArchive.setFont(new java.awt.Font("Geist SemiBold", 0, 12)); // NOI18N
         btnArchive.setForeground(new java.awt.Color(153, 27, 27));
-        btnArchive.setText("Archived");
+        btnArchive.setText("Archive");
         btnArchive.setPreferredSize(new java.awt.Dimension(100, 35));
         btnArchive.addActionListener(this::btnArchiveActionPerformed);
 
@@ -192,94 +272,283 @@ public class SuppliersPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddSupplierActionPerformed
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
 
-        ui.dialogs.AddSupplierDialog dialog = new ui.dialogs.AddSupplierDialog(parentFrame, true);
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens AddSupplierDialog
+        ui.dialogs.AddSupplierDialog dialog
+                = new ui.dialogs.AddSupplierDialog(
+                        parentFrame,
+                        true
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated supplier records
         loadSuppliers("");
     }//GEN-LAST:event_btnAddSupplierActionPerformed
 
     private void btnEditSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditSupplierActionPerformed
-        int selectedRow = tblSuppliers.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblSuppliers.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a supplier to edit.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a supplier to edit.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int supplierId = (int) tblSuppliers.getValueAt(selectedRow, 0);
-        String name = (String) tblSuppliers.getValueAt(selectedRow, 1);
-        String address = (String) tblSuppliers.getValueAt(selectedRow, 2);
-        String phone = (String) tblSuppliers.getValueAt(selectedRow, 3);
+        // Gets selected supplier information
+        int supplierId
+                = (int) tblSuppliers.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        String name
+                = (String) tblSuppliers.getValueAt(
+                        selectedRow,
+                        1
+                );
 
-        ui.dialogs.EditSupplierDialog dialog = new ui.dialogs.EditSupplierDialog(parentFrame, true, supplierId, name, address, phone);
+        String address
+                = (String) tblSuppliers.getValueAt(
+                        selectedRow,
+                        2
+                );
+
+        String phone
+                = (String) tblSuppliers.getValueAt(
+                        selectedRow,
+                        3
+                );
+
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
+
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens EditSupplierDialog
+        ui.dialogs.EditSupplierDialog dialog
+                = new ui.dialogs.EditSupplierDialog(
+                        parentFrame,
+                        true,
+                        supplierId,
+                        name,
+                        address,
+                        phone
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated supplier records
         loadSuppliers("");
     }//GEN-LAST:event_btnEditSupplierActionPerformed
 
     private void btnArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArchiveActionPerformed
-        int selectedRow = tblSuppliers.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblSuppliers.getSelectedRow();
+
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a supplier first.");
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a supplier first."
+            );
+
             return;
         }
 
-        int supplierId = (int) tblSuppliers.getValueAt(selectedRow, 0);
-        String supplierName = (String) tblSuppliers.getValueAt(selectedRow, 1);
+        // Gets selected supplier ID
+        int supplierId
+                = (int) tblSuppliers.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        boolean isArchivedView = chkShowArchived.isSelected();
-        String actionWord = isArchivedView ? "restore" : "archive";
-        String logAction = isArchivedView ? "RESTORE_SUPPLIER" : "ARCHIVE_SUPPLIER";
-        int newArchiveStatus = isArchivedView ? 0 : 1;
+        // Gets selected supplier name
+        String supplierName
+                = (String) tblSuppliers.getValueAt(
+                        selectedRow,
+                        1
+                );
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to " + actionWord + " '" + supplierName + "'?",
-                "Confirm Action",
-                javax.swing.JOptionPane.YES_NO_OPTION);
+        // Checks if currently viewing archived suppliers
+        boolean isArchivedView
+                = chkShowArchived.isSelected();
 
-        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
-            try (java.sql.Connection conn = database.DBConnection.getConnection()) {
+        // Determines action text
+        String actionWord
+                = isArchivedView
+                        ? "restore"
+                        : "archive";
 
-                String sql = "UPDATE Suppliers SET is_archived = ? WHERE supplier_id = ?";
-                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Determines audit log action
+        String logAction
+                = isArchivedView
+                        ? "RESTORE_SUPPLIER"
+                        : "ARCHIVE_SUPPLIER";
+
+        // Determines archive status value
+        int newArchiveStatus
+                = isArchivedView
+                        ? 0
+                        : 1;
+
+        // Confirmation dialog
+        int confirm
+                = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to "
+                        + actionWord
+                        + " '"
+                        + supplierName
+                        + "'?",
+                        "Confirm Action",
+                        javax.swing.JOptionPane.YES_NO_OPTION
+                );
+
+        // Runs if user clicks YES
+        if (confirm
+                == javax.swing.JOptionPane.YES_OPTION) {
+
+            try (
+                    // Connects to database
+                    java.sql.Connection conn
+                    = database.DBConnection.getConnection()) {
+
+                // ================= SUPPLIER ARCHIVE UPDATE =================
+                // SQL query:
+                // Updates archive status
+                String sql
+                        = "UPDATE Suppliers "
+                        + "SET is_archived = ? "
+                        + "WHERE supplier_id = ?";
+
+                try (
+                        // Creates PreparedStatement
+                        java.sql.PreparedStatement pstmt
+                        = conn.prepareStatement(sql)) {
+
+                    // Updates archive status
                     pstmt.setInt(1, newArchiveStatus);
+
+                    // Selects correct supplier
                     pstmt.setInt(2, supplierId);
+
+                    // Executes UPDATE query
                     pstmt.executeUpdate();
                 }
 
-                String logSql = "{call sp_InsertAuditLog(?, ?, ?)}";
-                try (java.sql.CallableStatement cstmtLog = conn.prepareCall(logSql)) {
-                    cstmtLog.setInt(1, LoginPanel.loggedInUserId);
-                    cstmtLog.setString(2, logAction);
-                    cstmtLog.setString(3, actionWord.substring(0, 1).toUpperCase() + actionWord.substring(1) + "d Supplier ID: " + supplierId);
+                // ================= AUDIT LOG =================
+                // SQL query:
+                // Calls stored procedure for audit logs
+                String logSql
+                        = "{call sp_InsertAuditLog(?, ?, ?)}";
+
+                try (
+                        // Creates CallableStatement
+                        java.sql.CallableStatement cstmtLog
+                        = conn.prepareCall(logSql)) {
+
+                    // Inserts logged-in user ID
+                    cstmtLog.setInt(
+                            1,
+                            LoginPanel.loggedInUserId
+                    );
+
+                    // Inserts action type
+                    cstmtLog.setString(
+                            2,
+                            logAction
+                    );
+
+                    // Inserts audit description
+                    cstmtLog.setString(
+                            3,
+                            actionWord.substring(0, 1)
+                                    .toUpperCase()
+                            + actionWord.substring(1)
+                            + "d Supplier ID: "
+                            + supplierId
+                    );
+
+                    // Executes stored procedure
                     cstmtLog.execute();
                 }
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Supplier " + actionWord + "d successfully.");
+                // Success message
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Supplier "
+                        + actionWord
+                        + "d successfully."
+                );
 
+                // Reloads updated supplier records
                 loadSuppliers("");
 
             } catch (Exception e) {
+
+                // Prints error in console
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Error processing request: " + e.getMessage());
+
+                // Shows database/system error
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Error processing request: "
+                        + e.getMessage()
+                );
             }
         }
     }//GEN-LAST:event_btnArchiveActionPerformed
 
     private void chkShowArchivedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowArchivedActionPerformed
+        // Changes button text based on checkbox state
         if (chkShowArchived.isSelected()) {
+
             btnArchive.setText("Restore");
+
         } else {
+
             btnArchive.setText("Archive");
         }
+
+        // Reloads suppliers based on selected view
         loadSuppliers("");
     }//GEN-LAST:event_chkShowArchivedActionPerformed
 

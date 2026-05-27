@@ -1,16 +1,31 @@
 package ui.dialogs;
 
+// Imports database connection class
+import database.DBConnection;
+
+// Imports SQL classes
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
+// Imports JOptionPane for message dialogs
 import javax.swing.JOptionPane;
-import database.DBConnection;
 
 public class AddProductDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddProductDialog.class.getName());
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    AddProductDialog.class.getName()
+            );
 
+    // Constructor
+    // Creates the dialog window
     public AddProductDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
     }
 
@@ -148,62 +163,145 @@ public class AddProductDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtPriceActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes the dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String name = txtProductName.getText().trim();
-        String category = cbCategory.getSelectedItem().toString();
-        String priceText = txtPrice.getText().trim();
+        // Gets product name from text field
+        String name =
+                txtProductName.getText().trim();
 
+        // Gets selected category
+        String category =
+                cbCategory.getSelectedItem().toString();
+
+        // Gets price input
+        String priceText =
+                txtPrice.getText().trim();
+
+        // Validation:
+        // Checks if product name or price is empty
         if (name.isEmpty() || priceText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields before saving.", "Missing Data", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please fill in all fields before saving.",
+                    "Missing Data",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
         try {
-            double price = Double.parseDouble(priceText);
+
+            // Converts price text into double value
+            double price =
+                    Double.parseDouble(priceText);
+
+            // Validation:
+            // Price must be greater than 0
             if (price <= 0) {
+
                 JOptionPane.showMessageDialog(
                         this,
                         "Product price must be greater than 0!",
                         "Invalid Price",
                         JOptionPane.WARNING_MESSAGE
                 );
+
                 return;
             }
 
-            int categoryId = cbCategory.getSelectedIndex() + 1;
+            // Gets category ID based on combo box index
+            // +1 because database IDs start at 1
+            int categoryId =
+                    cbCategory.getSelectedIndex() + 1;
 
-            Connection conn = DBConnection.getConnection();
+            // Connects to database
+            Connection conn =
+                    DBConnection.getConnection();
 
-            String sql = "INSERT INTO Products (name, category_id, price, is_archived) VALUES (?, ?, ?, 0)";
-            PreparedStatement pstmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
+            // SQL query for inserting product
+            String sql =
+                    "INSERT INTO Products " +
+                    "(name, category_id, price, is_archived) " +
+                    "VALUES (?, ?, ?, 0)";
 
+            // Creates PreparedStatement
+            // RETURN_GENERATED_KEYS gets the new product ID
+            PreparedStatement pstmt =
+                    conn.prepareStatement(
+                            sql,
+                            java.sql.Statement.RETURN_GENERATED_KEYS
+                    );
+
+            // Inserts product name
             pstmt.setString(1, name);
+
+            // Inserts category ID
             pstmt.setInt(2, categoryId);
+
+            // Inserts product price
             pstmt.setDouble(3, price);
 
+            // Executes INSERT query
             pstmt.executeUpdate();
 
-            java.sql.ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                int newProductId = rs.getInt(1);
+            // Gets the generated product ID
+            java.sql.ResultSet rs =
+                    pstmt.getGeneratedKeys();
 
-                String invSql = "INSERT INTO Inventory (product_id, current_stock) VALUES (?, 0)";
-                PreparedStatement invPstmt = conn.prepareStatement(invSql);
+            // Checks if product was inserted successfully
+            if (rs.next()) {
+
+                // Gets newly created product ID
+                int newProductId =
+                        rs.getInt(1);
+
+                // Automatically creates inventory record
+                String invSql =
+                        "INSERT INTO Inventory " +
+                        "(product_id, current_stock) " +
+                        "VALUES (?, 0)";
+
+                // Creates PreparedStatement for Inventory table
+                PreparedStatement invPstmt =
+                        conn.prepareStatement(invSql);
+
+                // Inserts product ID into Inventory table
                 invPstmt.setInt(1, newProductId);
+
+                // Executes inventory insert query
                 invPstmt.executeUpdate();
             }
 
-            JOptionPane.showMessageDialog(this, "Product Added Successfully!");
+            // Success message
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Product Added Successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Price must be a valid number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+
+            // Runs if price is not numeric
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Price must be a valid number!",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
+
+            // Shows database/system error
             JOptionPane.showMessageDialog(
                     this,
                     "Unable to save product. Please check your input values.",
@@ -234,17 +332,33 @@ public class AddProductDialog extends javax.swing.JDialog {
         }
         //</editor-fold>
 
-        /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                AddProductDialog dialog = new AddProductDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
+
+                // Creates dialog window
+                AddProductDialog dialog =
+                        new AddProductDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
+                            @Override
+                            public void windowClosing(
+                                    java.awt.event.WindowEvent e) {
+
+                                System.exit(0);
+                            }
+                        }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });

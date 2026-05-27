@@ -1,35 +1,82 @@
 package ui.dialogs;
 
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
 
 public class AddPurchaseDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddPurchaseDialog.class.getName());
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    AddPurchaseDialog.class.getName()
+            );
 
+    // Constructor
+    // Creates the dialog window
     public AddPurchaseDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
+
+        // Loads suppliers and products into combo boxes
         loadDropdowns();
     }
 
+    // Loads supplier and product data from database
     private void loadDropdowns() {
+
+        // Clears existing items
         cbSupplier.removeAllItems();
         cbProduct.removeAllItems();
 
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            java.sql.ResultSet rsSuppliers = conn.createStatement().executeQuery("SELECT supplier_id, supplier_name FROM Suppliers WHERE is_archived = 0");
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // Gets all active suppliers
+            java.sql.ResultSet rsSuppliers
+                    = conn.createStatement().executeQuery(
+                            "SELECT supplier_id, supplier_name "
+                            + "FROM Suppliers "
+                            + "WHERE is_archived = 0"
+                    );
+
+            // Adds suppliers into combo box
             while (rsSuppliers.next()) {
-                cbSupplier.addItem(rsSuppliers.getInt("supplier_id") + " - " + rsSuppliers.getString("supplier_name"));
+
+                cbSupplier.addItem(
+                        rsSuppliers.getInt("supplier_id")
+                        + " - "
+                        + rsSuppliers.getString("supplier_name")
+                );
             }
 
-            java.sql.ResultSet rsProducts = conn.createStatement().executeQuery("SELECT product_id, name FROM Products WHERE is_archived = 0");
+            // Gets all active products
+            java.sql.ResultSet rsProducts
+                    = conn.createStatement().executeQuery(
+                            "SELECT product_id, name "
+                            + "FROM Products "
+                            + "WHERE is_archived = 0"
+                    );
+
+            // Adds products into combo box
             while (rsProducts.next()) {
-                cbProduct.addItem(rsProducts.getInt("product_id") + " - " + rsProducts.getString("name"));
+
+                cbProduct.addItem(
+                        rsProducts.getInt("product_id")
+                        + " - "
+                        + rsProducts.getString("name")
+                );
             }
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
         }
     }
@@ -181,82 +228,198 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtCostPriceActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         try {
-            int supplierId = Integer.parseInt(cbSupplier.getSelectedItem().toString().split(" - ")[0]);
-            int productId = Integer.parseInt(cbProduct.getSelectedItem().toString().split(" - ")[0]);
 
-            int quantity = Integer.parseInt(txtQuantity.getText().trim());
-            double costPrice = Double.parseDouble(txtCostPrice.getText().trim());
+            // Gets supplier ID from combo box
+            int supplierId =
+                    Integer.parseInt(
+                            cbSupplier.getSelectedItem()
+                                    .toString()
+                                    .split(" - ")[0]
+                    );
 
+            // Gets product ID from combo box
+            int productId =
+                    Integer.parseInt(
+                            cbProduct.getSelectedItem()
+                                    .toString()
+                                    .split(" - ")[0]
+                    );
+
+            // Gets quantity input
+            int quantity =
+                    Integer.parseInt(
+                            txtQuantity.getText().trim()
+                    );
+
+            // Gets cost price input
+            double costPrice =
+                    Double.parseDouble(
+                            txtCostPrice.getText().trim()
+                    );
+
+            // Validation:
+            // Quantity must be greater than 0
+            // Cost price cannot be negative
             if (quantity <= 0 || costPrice < 0) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Quantity and Cost must be valid numbers.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Quantity and Cost must be valid numbers.",
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
+
                 return;
             }
 
-            java.sql.Connection conn = database.DBConnection.getConnection();
+            // Connects to database
+            java.sql.Connection conn =
+                    database.DBConnection.getConnection();
+
+            // Starts transaction mode
+            // All queries must succeed together
             conn.setAutoCommit(false);
 
             try {
-                String sqlPurch = "INSERT INTO Purchases (supplier_id, status) VALUES (?, 'Delivered')";
-                java.sql.PreparedStatement pstmtPurch = conn.prepareStatement(sqlPurch, java.sql.Statement.RETURN_GENERATED_KEYS);
 
+                // ================= PURCHASE TABLE =================
+
+                // Inserts purchase record
+                String sqlPurch =
+                        "INSERT INTO Purchases " +
+                        "(supplier_id, status) " +
+                        "VALUES (?, 'Delivered')";
+
+                // RETURN_GENERATED_KEYS gets new purchase ID
+                java.sql.PreparedStatement pstmtPurch =
+                        conn.prepareStatement(
+                                sqlPurch,
+                                java.sql.Statement.RETURN_GENERATED_KEYS
+                        );
+
+                // Inserts supplier ID
                 pstmtPurch.setInt(1, supplierId);
+
+                // Executes INSERT query
                 pstmtPurch.executeUpdate();
 
-                java.sql.ResultSet rsKeys = pstmtPurch.getGeneratedKeys();
+                // Gets generated purchase ID
+                java.sql.ResultSet rsKeys =
+                        pstmtPurch.getGeneratedKeys();
+
                 int purchaseId = 0;
 
+                // Checks if purchase was created
                 if (rsKeys.next()) {
+
+                    // Gets new purchase ID
                     purchaseId = rsKeys.getInt(1);
                 }
 
-                String sqlDetails = "INSERT INTO Purchase_Details (purchase_id, product_id, quantity_bought, cost_price) VALUES (?, ?, ?, ?)";
-                java.sql.PreparedStatement pstmtDetails = conn.prepareStatement(sqlDetails);
+                // ================= PURCHASE DETAILS TABLE =================
 
+                // Inserts purchase details
+                String sqlDetails =
+                        "INSERT INTO Purchase_Details " +
+                        "(purchase_id, product_id, quantity_bought, cost_price) " +
+                        "VALUES (?, ?, ?, ?)";
+
+                java.sql.PreparedStatement pstmtDetails =
+                        conn.prepareStatement(sqlDetails);
+
+                // Inserts purchase ID
                 pstmtDetails.setInt(1, purchaseId);
+
+                // Inserts product ID
                 pstmtDetails.setInt(2, productId);
+
+                // Inserts quantity
                 pstmtDetails.setInt(3, quantity);
+
+                // Inserts cost price
                 pstmtDetails.setDouble(4, costPrice);
 
+                // Executes INSERT query
                 pstmtDetails.executeUpdate();
 
-                String sqlInv = "UPDATE Inventory SET current_stock = current_stock + ? WHERE product_id = ?";
-                java.sql.PreparedStatement pstmtInv = conn.prepareStatement(sqlInv);
+                // ================= INVENTORY TABLE =================
 
+                // Updates inventory stock
+                String sqlInv =
+                        "UPDATE Inventory " +
+                        "SET current_stock = current_stock + ? " +
+                        "WHERE product_id = ?";
+
+                java.sql.PreparedStatement pstmtInv =
+                        conn.prepareStatement(sqlInv);
+
+                // Adds purchased quantity
                 pstmtInv.setInt(1, quantity);
+
+                // Selects correct product
                 pstmtInv.setInt(2, productId);
 
-                int rowsUpdated = pstmtInv.executeUpdate();
+                // Executes UPDATE query
+                int rowsUpdated =
+                        pstmtInv.executeUpdate();
 
+                // If product does not exist in Inventory table
                 if (rowsUpdated == 0) {
-                    String sqlInsertInv = "INSERT INTO Inventory (product_id, current_stock) VALUES (?, ?)";
-                    java.sql.PreparedStatement pstmtInsertInv = conn.prepareStatement(sqlInsertInv);
 
+                    // Creates new inventory record
+                    String sqlInsertInv =
+                            "INSERT INTO Inventory " +
+                            "(product_id, current_stock) " +
+                            "VALUES (?, ?)";
+
+                    java.sql.PreparedStatement pstmtInsertInv =
+                            conn.prepareStatement(sqlInsertInv);
+
+                    // Inserts product ID
                     pstmtInsertInv.setInt(1, productId);
+
+                    // Inserts starting stock quantity
                     pstmtInsertInv.setInt(2, quantity);
 
+                    // Executes INSERT query
                     pstmtInsertInv.executeUpdate();
                 }
 
+                // Saves all database changes permanently
                 conn.commit();
 
-                javax.swing.JOptionPane.showMessageDialog(this, "Purchase successful! Inventory has been restocked.");
+                // Success message
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Purchase successful! Inventory has been restocked."
+                );
+
+                // Closes dialog
                 this.dispose();
 
             } catch (Exception ex) {
+
+                // Cancels all database changes if an error happens
                 conn.rollback();
+
+                // Throws error again
                 throw ex;
 
             } finally {
+
+                // Turns auto-commit back on
                 conn.setAutoCommit(true);
             }
 
         } catch (NumberFormatException e) {
 
+            // Runs if quantity or cost is not numeric
             JOptionPane.showMessageDialog(
                     this,
                     "Please enter valid numbers for quantity and cost.",
@@ -266,8 +429,10 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
 
         } catch (Exception e) {
 
+            // Prints error in console
             e.printStackTrace();
 
+            // Shows database/system error
             JOptionPane.showMessageDialog(
                     this,
                     "Unable to save purchase. Please try again.",
@@ -303,16 +468,33 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
         //</editor-fold>
 
         /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                AddPurchaseDialog dialog = new AddPurchaseDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
+
+                // Creates dialog window
+                AddPurchaseDialog dialog =
+                        new AddPurchaseDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
+                            @Override
+                            public void windowClosing(
+                                    java.awt.event.WindowEvent e) {
+
+                                System.exit(0);
+                            }
+                        }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });

@@ -1,84 +1,195 @@
 package ui.menuPanel;
 
+// Imports Swing constants for table alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class HomePanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when HomePanel is created
     public HomePanel() {
+
+        // Initializes all UI components
         initComponents();
 
+        // Styles the table header font
         tblLowStock.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 11)
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        11
+                )
         );
+
+        // Changes table header background color
         tblLowStock.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblLowStock.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblLowStock.setIntercellSpacing(new java.awt.Dimension(0, 0));
+
+        // Removes spacing between table cells
+        tblLowStock.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
         tblLowStock.setShowGrid(false);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblLowStock.getColumnCount(); i++) {
-            tblLowStock.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblLowStock.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
+        // Loads dashboard data
         loadDashboardData();
     }
 
+    // Loads dashboard statistics and low stock data
     public void loadDashboardData() {
+
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sqlRev = "SELECT ISNULL(SUM(total_amount), 0) AS today_rev FROM Transactions "
-                    + "WHERE status != 'Voided' AND CAST(transaction_date AS DATE) = CAST(GETDATE() AS DATE)";
-            java.sql.ResultSet rsRev = conn.createStatement().executeQuery(sqlRev);
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // ================= TODAY'S REVENUE =================
+            // SQL query:
+            // Gets total revenue for today's completed transactions
+            String sqlRev
+                    = "SELECT ISNULL(SUM(total_amount), 0) "
+                    + "AS today_rev "
+                    + "FROM Transactions "
+                    + "WHERE status != 'Voided' "
+                    + "AND CAST(transaction_date AS DATE) "
+                    + "= CAST(GETDATE() AS DATE)";
+
+            // Executes revenue query
+            java.sql.ResultSet rsRev
+                    = conn.createStatement()
+                            .executeQuery(sqlRev);
+
+            // Displays today's revenue
             if (rsRev.next()) {
-                lblTodayRevenue.setText(String.format("%,.2f", rsRev.getDouble("today_rev")));
+
+                lblTodayRevenue.setText(
+                        String.format(
+                                "%,.2f",
+                                rsRev.getDouble("today_rev")
+                        )
+                );
             }
 
-            String sqlPending = "SELECT COUNT(*) AS pending_count FROM Purchases WHERE status = 'Pending'";
-            java.sql.ResultSet rsPending = conn.createStatement().executeQuery(sqlPending);
+            // ================= PENDING RESTOCKS =================
+            // SQL query:
+            // Counts all pending purchase orders
+            String sqlPending
+                    = "SELECT COUNT(*) AS pending_count "
+                    + "FROM Purchases "
+                    + "WHERE status = 'Pending'";
+
+            // Executes pending query
+            java.sql.ResultSet rsPending
+                    = conn.createStatement()
+                            .executeQuery(sqlPending);
+
+            // Displays pending restock count
             if (rsPending.next()) {
-                lblPendingCount.setText(String.valueOf(rsPending.getInt("pending_count")));
+
+                lblPendingCount.setText(
+                        String.valueOf(
+                                rsPending.getInt("pending_count")
+                        )
+                );
             }
 
-            String sqlLowStock = "SELECT p.name AS ProductName, c.category_name AS Category, i.current_stock "
+            // ================= LOW STOCK ITEMS =================
+            // SQL query:
+            // Gets products with stock less than or equal to 15
+            String sqlLowStock
+                    = "SELECT p.name AS ProductName, "
+                    + "c.category_name AS Category, "
+                    + "i.current_stock "
                     + "FROM Products p "
-                    + "JOIN Categories c ON p.category_id = c.category_id "
-                    + "JOIN Inventory i ON p.product_id = i.product_id "
-                    + "WHERE i.current_stock <= 15 AND p.is_archived = 0 "
+                    + "JOIN Categories c "
+                    + "ON p.category_id = c.category_id "
+                    + "JOIN Inventory i "
+                    + "ON p.product_id = i.product_id "
+                    + "WHERE i.current_stock <= 15 "
+                    + "AND p.is_archived = 0 "
                     + "ORDER BY i.current_stock ASC";
 
-            java.sql.ResultSet rsLow = conn.createStatement().executeQuery(sqlLowStock);
+            // Executes low stock query
+            java.sql.ResultSet rsLow
+                    = conn.createStatement()
+                            .executeQuery(sqlLowStock);
 
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblLowStock.getModel();
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel) tblLowStock.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
+            // Counter for low stock products
             int lowStockItemsCount = 0;
 
+            // Loops through low stock products
             while (rsLow.next()) {
+
+                // Adds product into table
                 model.addRow(new Object[]{
                     rsLow.getString("ProductName"),
                     rsLow.getString("Category"),
                     rsLow.getInt("current_stock")
                 });
+
+                // Increases low stock counter
                 lowStockItemsCount++;
             }
 
-            lblLowStockCount.setText(String.valueOf(lowStockItemsCount));
+            // Displays low stock count
+            lblLowStockCount.setText(
+                    String.valueOf(lowStockItemsCount)
+            );
 
+            // Changes text color to red if there are low stock items
             if (lowStockItemsCount > 0) {
-                lblLowStockCount.setForeground(new java.awt.Color(220, 38, 38));
+
+                lblLowStockCount.setForeground(
+                        new java.awt.Color(220, 38, 38)
+                );
             }
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            System.out.println("Dashboard Load Error: " + e.getMessage());
+
+            // Displays dashboard loading error
+            System.out.println(
+                    "Dashboard Load Error: "
+                    + e.getMessage()
+            );
         }
     }
 

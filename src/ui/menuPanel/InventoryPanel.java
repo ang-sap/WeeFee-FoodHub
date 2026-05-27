@@ -1,58 +1,127 @@
 package ui.menuPanel;
 
+// Imports file chooser for exporting files
 import javax.swing.JFileChooser;
+
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
+
+// Imports Swing constants for table alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class InventoryPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when InventoryPanel is created
     public InventoryPanel() {
+
+        // Initializes all UI components
         initComponents();
 
+        // Styles the table header font
         tblInventory.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
         );
+
+        // Changes table header background color
         tblInventory.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblInventory.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblInventory.setIntercellSpacing(new java.awt.Dimension(0, 0));
+
+        // Removes spacing between table cells
+        tblInventory.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
         tblInventory.setShowGrid(false);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
 
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblInventory.getColumnCount(); i++) {
-            tblInventory.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblInventory.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
+        // Loads inventory records into table
         loadInventoryToTable();
     }
 
+    // Loads inventory records from database
     public void loadInventoryToTable() {
-        try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sql = "SELECT p.product_id, p.name, ISNULL(i.current_stock, 0) AS current_stock "
+        try {
+
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // SQL query:
+            // Gets all active products and their stock quantity
+            String sql
+                    = "SELECT p.product_id, "
+                    + "p.name, "
+                    + "ISNULL(i.current_stock, 0) "
+                    + "AS current_stock "
                     + "FROM Products p "
-                    + "LEFT JOIN Inventory i ON p.product_id = i.product_id "
+                    + "LEFT JOIN Inventory i "
+                    + "ON p.product_id = i.product_id "
                     + "WHERE p.is_archived = 0 "
                     + "ORDER BY p.name ASC";
 
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-            java.sql.ResultSet rs = pstmt.executeQuery();
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
 
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblInventory.getModel();
+            // Executes SELECT query
+            java.sql.ResultSet rs
+                    = pstmt.executeQuery();
+
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel) tblInventory.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
+            // Loops through inventory records
             while (rs.next()) {
-                int stock = rs.getInt("current_stock");
 
-                String status = (stock == 0) ? "Out of Stock" : (stock <= 15) ? "Low Stock" : "In Stock";
+                // Gets current stock quantity
+                int stock
+                        = rs.getInt("current_stock");
 
+                // Determines stock status
+                String status
+                        = (stock == 0)
+                                ? "Out of Stock"
+                                : (stock <= 15)
+                                        ? "Low Stock"
+                                        : "In Stock";
+
+                // Adds row into table
                 model.addRow(new Object[]{
                     rs.getInt("product_id"),
                     rs.getString("name"),
@@ -60,9 +129,18 @@ public class InventoryPanel extends javax.swing.JPanel {
                     status
                 });
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading inventory: " + e.getMessage());
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading inventory: "
+                    + e.getMessage()
+            );
         }
     }
 
@@ -174,75 +252,222 @@ public class InventoryPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        int selectedRow = tblInventory.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblInventory.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a product from the table first.", "No Selection", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a product from the table first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        Object idObj = tblInventory.getValueAt(selectedRow, 0);
-        Object nameObj = tblInventory.getValueAt(selectedRow, 1);
-        Object stockObj = tblInventory.getValueAt(selectedRow, 2);
+        // Gets selected row values
+        Object idObj
+                = tblInventory.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        if (idObj == null || nameObj == null || stockObj == null) {
-            JOptionPane.showMessageDialog(this, "This row contains empty or invalid data.", "Data Error", JOptionPane.ERROR_MESSAGE);
+        Object nameObj
+                = tblInventory.getValueAt(
+                        selectedRow,
+                        1
+                );
+
+        Object stockObj
+                = tblInventory.getValueAt(
+                        selectedRow,
+                        2
+                );
+
+        // Validation:
+        // Checks if row contains invalid data
+        if (idObj == null
+                || nameObj == null
+                || stockObj == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This row contains empty or invalid data.",
+                    "Data Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
             return;
         }
 
-        int productId = Integer.parseInt(idObj.toString());
-        String productName = nameObj.toString();
-        int currentStock = Integer.parseInt(stockObj.toString());
+        // Converts table values into proper data types
+        int productId
+                = Integer.parseInt(
+                        idObj.toString()
+                );
 
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        String productName
+                = nameObj.toString();
 
-        ui.dialogs.UpdateStockDialog dialog = new ui.dialogs.UpdateStockDialog(parentFrame, true, productId, productName, currentStock);
+        int currentStock
+                = Integer.parseInt(
+                        stockObj.toString()
+                );
+
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
+
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                        ? (java.awt.Frame) parentWindow
+                        : null;
+
+        // Opens UpdateStockDialog
+        ui.dialogs.UpdateStockDialog dialog
+                = new ui.dialogs.UpdateStockDialog(
+                        parentFrame,
+                        true,
+                        productId,
+                        productName,
+                        currentStock
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated inventory data
         loadInventoryToTable();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void ExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExportActionPerformed
+        // Validation:
+        // Checks if table has data
         if (tblInventory.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "There is no data to export!", "Export Error", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "There is no data to export!",
+                    "Export Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Export to CSV");
-        fileChooser.setSelectedFile(new java.io.File("InventoryStockReport.csv"));
+        // Creates file chooser window
+        JFileChooser fileChooser
+                = new JFileChooser();
 
-        int userSelection = fileChooser.showSaveDialog(this);
+        // Dialog title
+        fileChooser.setDialogTitle(
+                "Export to CSV"
+        );
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            java.io.File fileToSave = fileChooser.getSelectedFile();
+        // Default file name
+        fileChooser.setSelectedFile(
+                new java.io.File(
+                        "InventoryStockReport.csv"
+                )
+        );
 
-            try (java.io.FileWriter fw = new java.io.FileWriter(fileToSave); java.io.BufferedWriter bw = new java.io.BufferedWriter(fw)) {
+        // Opens Save File dialog
+        int userSelection
+                = fileChooser.showSaveDialog(this);
 
-                for (int i = 0; i < tblInventory.getColumnCount(); i++) {
-                    bw.write(tblInventory.getColumnName(i) + ",");
+        // Runs if user clicks Save
+        if (userSelection
+                == JFileChooser.APPROVE_OPTION) {
+
+            // Gets selected file path
+            java.io.File fileToSave
+                    = fileChooser.getSelectedFile();
+
+            try (
+                    // Creates FileWriter
+                    java.io.FileWriter fw
+                    = new java.io.FileWriter(fileToSave); // Creates BufferedWriter
+                     java.io.BufferedWriter bw
+                    = new java.io.BufferedWriter(fw)) {
+
+                // ================= EXPORT COLUMN HEADERS =================
+                for (int i = 0;
+                        i < tblInventory.getColumnCount();
+                        i++) {
+
+                    // Writes column names into CSV
+                    bw.write(
+                            tblInventory.getColumnName(i)
+                            + ","
+                    );
                 }
+
+                // Moves to next line
                 bw.newLine();
 
-                for (int i = 0; i < tblInventory.getRowCount(); i++) {
-                    for (int j = 0; j < tblInventory.getColumnCount(); j++) {
-                        Object cellValue = tblInventory.getValueAt(i, j);
+                // ================= EXPORT TABLE DATA =================
+                for (int i = 0;
+                        i < tblInventory.getRowCount();
+                        i++) {
 
+                    for (int j = 0;
+                            j < tblInventory.getColumnCount();
+                            j++) {
+
+                        // Gets cell value
+                        Object cellValue
+                                = tblInventory.getValueAt(i, j);
+
+                        // Checks if value exists
                         if (cellValue != null) {
-                            bw.write(cellValue.toString().replace(",", "") + ",");
+
+                            // Removes commas to avoid CSV errors
+                            bw.write(
+                                    cellValue.toString()
+                                            .replace(",", "")
+                                    + ","
+                            );
+
                         } else {
+
+                            // Writes blank value
                             bw.write(",");
                         }
                     }
+
+                    // Moves to next row
                     bw.newLine();
                 }
 
-                JOptionPane.showMessageDialog(this, "Data successfully exported to:\n" + fileToSave.getAbsolutePath(), "Export Success", JOptionPane.INFORMATION_MESSAGE);
+                // Success message
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Data successfully exported to:\n"
+                        + fileToSave.getAbsolutePath(),
+                        "Export Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error exporting file: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+
+                // Shows export error
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Error exporting file: "
+                        + e.getMessage(),
+                        "Export Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }//GEN-LAST:event_ExportActionPerformed

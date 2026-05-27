@@ -1,84 +1,208 @@
 package ui.dialogs;
 
+// Imports Swing components
 import javax.swing.*;
+
+// Imports AWT classes for image handling
 import java.awt.*;
+
+// Imports POSPanel so this card can add items to cart
 import ui.menuPanel.POSPanel;
 
 public class ProductCard extends javax.swing.JPanel {
 
+    // Stores product ID
     private int id;
+
+    // Stores product name
     private String name;
+
+    // Stores product price
     private double price;
+
+    // Reference to the POS Panel
+    // Used to call addToCart()
     private POSPanel parentPanel;
 
-    public ProductCard(int id, String name, double price, String imagePath, POSPanel parentPanel) {
+    // Constructor
+    // Creates a product card
+    public ProductCard(
+            int id,
+            String name,
+            double price,
+            String imagePath,
+            POSPanel parentPanel
+    ) {
+
+        // Stores product information
         this.id = id;
         this.name = name;
         this.price = price;
+
+        // Stores reference to POS Panel
         this.parentPanel = parentPanel;
 
+        // Initializes UI components
         initComponents();
 
-        lblProductName.setText("<html><body style='width: 105px;'>" + name + "</body></html>");
-        lblPrice.setText(String.format("%.2f", price));
+        // Displays product name
+        // HTML is used so long names wrap into multiple lines
+        lblProductName.setText(
+                "<html><body style='width: 105px;'>"
+                + name
+                + "</body></html>"
+        );
 
-        try { 
+        // Displays formatted price
+        lblPrice.setText(
+                String.format("%.2f", price)
+        );
+
+        try {
+
+            // If image path is empty, use default image
             if (imagePath == null || imagePath.isEmpty()) {
+
                 imagePath = "/images/default.png";
             }
-            
-            java.net.URL imgURL = getClass().getResource(imagePath);
+
+            // Gets image resource from project folder
+            java.net.URL imgURL
+                    = getClass().getResource(imagePath);
+
+            // Checks if image exists
             if (imgURL != null) {
-                ImageIcon originalIcon = new ImageIcon(imgURL);
 
-                Image scaledImage = originalIcon.getImage().getScaledInstance(156, 96, Image.SCALE_SMOOTH);
+                // Loads original image
+                ImageIcon originalIcon
+                        = new ImageIcon(imgURL);
 
-                lblImage.setIcon(new ImageIcon(scaledImage));
+                // Resizes image smoothly
+                Image scaledImage
+                        = originalIcon.getImage()
+                                .getScaledInstance(
+                                        156,
+                                        96,
+                                        Image.SCALE_SMOOTH
+                                );
+
+                // Displays resized image
+                lblImage.setIcon(
+                        new ImageIcon(scaledImage)
+                );
+
+                // Removes placeholder text
                 lblImage.setText("");
+
             } else {
+
+                // Displays message if image is missing
                 lblImage.setText("No Image");
             }
 
-            lblImage.setHorizontalAlignment(SwingConstants.CENTER);
-            lblImage.setVerticalAlignment(SwingConstants.CENTER);
+            // Centers image horizontally
+            lblImage.setHorizontalAlignment(
+                    SwingConstants.CENTER
+            );
 
+            // Centers image vertically
+            lblImage.setVerticalAlignment(
+                    SwingConstants.CENTER
+            );
+
+            // Sets image label size
             lblImage.setSize(156, 96);
 
+            // Sets image label position
             lblImage.setLocation(2, 2);
-        } catch (Exception e) {
-            System.out.println("Could not load image: " + imagePath);
-        }
-        
-        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240), 1));
 
-        java.awt.event.MouseAdapter interactiveAdapter = new java.awt.event.MouseAdapter() {
+        } catch (Exception e) {
+
+            // Prints image loading error
+            System.out.println(
+                    "Could not load image: " + imagePath
+            );
+        }
+
+        // Default border design
+        jPanel2.setBorder(
+                javax.swing.BorderFactory.createLineBorder(
+                        new java.awt.Color(226, 232, 240),
+                        1
+                )
+        );
+
+        // Mouse events for product card interactions
+        java.awt.event.MouseAdapter interactiveAdapter
+                = new java.awt.event.MouseAdapter() {
+
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
+            public void mouseClicked(
+                    java.awt.event.MouseEvent e
+            ) {
+
+                // Adds product to cart when clicked
                 parentPanel.addToCart(id, name, price);
             }
 
             @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                jPanel2.setLocation(0, -3); 
-                jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(148, 163, 184), 2)); 
-                jPanel2.setBackground(new java.awt.Color(248, 250, 252)); 
+            public void mouseEntered(
+                    java.awt.event.MouseEvent e
+            ) {
+
+                // Slightly lifts card upward
+                jPanel2.setLocation(0, -3);
+
+                // Changes border color and thickness
+                jPanel2.setBorder(
+                        javax.swing.BorderFactory.createLineBorder(
+                                new java.awt.Color(148, 163, 184),
+                                2
+                        )
+                );
+
+                // Changes background color on hover
+                jPanel2.setBackground(
+                        new java.awt.Color(248, 250, 252)
+                );
             }
 
             @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                jPanel2.setLocation(0, 0); 
-                jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240), 1)); 
-                jPanel2.setBackground(new java.awt.Color(255, 255, 255)); 
+            public void mouseExited(
+                    java.awt.event.MouseEvent e
+            ) {
+
+                // Returns card to original position
+                jPanel2.setLocation(0, 0);
+
+                // Restores default border
+                jPanel2.setBorder(
+                        javax.swing.BorderFactory.createLineBorder(
+                                new java.awt.Color(226, 232, 240),
+                                1
+                        )
+                );
+
+                // Restores default background
+                jPanel2.setBackground(
+                        new java.awt.Color(255, 255, 255)
+                );
             }
         };
 
+        // Adds mouse interaction to all card components
         this.addMouseListener(interactiveAdapter);
         jPanel2.addMouseListener(interactiveAdapter);
         lblImage.addMouseListener(interactiveAdapter);
         lblProductName.addMouseListener(interactiveAdapter);
         lblPrice.addMouseListener(interactiveAdapter);
-        
-        this.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+
+        // Changes mouse cursor into hand cursor
+        this.setCursor(
+                new java.awt.Cursor(
+                        java.awt.Cursor.HAND_CURSOR
+                )
+        );
     }
 
     /**
@@ -124,7 +248,6 @@ public class ProductCard extends javax.swing.JPanel {
         add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
     }// </editor-fold>//GEN-END:initComponents
 
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Total;

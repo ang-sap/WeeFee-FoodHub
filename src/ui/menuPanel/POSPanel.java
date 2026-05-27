@@ -1,107 +1,319 @@
 package ui.menuPanel;
 
+// Imports ProductCard UI component
 import ui.dialogs.ProductCard;
+
+// Imports SQL classes
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+// Imports database connection class
 import database.DBConnection;
+
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
+
+// Imports Swing constants for table alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports LoginPanel to get logged-in user information
 import ui.auth.LoginPanel;
 
 public class POSPanel extends javax.swing.JPanel {
 
+    // Stores current total amount of cart
     private double currentTotal = 0.0;
 
+    // Constructor
+    // Runs when POSPanel is created
     public POSPanel() {
+
+        // Initializes all UI components
         initComponents();
 
-        menuGrid.setLayout(new java.awt.GridLayout(0, 3, 15, 2));
-        menuGrid.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 25, 5, 10));
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        // Sets product card layout
+        menuGrid.setLayout(
+                new java.awt.GridLayout(0, 3, 15, 2)
+        );
 
-        txtSearch.putClientProperty("JTextField.placeholderText", "ex. Siomai");
+        // Adds padding around menu grid
+        menuGrid.setBorder(
+                javax.swing.BorderFactory.createEmptyBorder(
+                        5, 25, 5, 10
+                )
+        );
 
-        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{"Item", "", "Qty", "", "Total", "", "ID"}
-        ) {
-            boolean[] canEdit = new boolean[]{false, false, false, false, false, false, false};
+        // Removes horizontal scrollbar
+        jScrollPane1.setHorizontalScrollBarPolicy(
+                javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
+        // Placeholder text inside search field
+        txtSearch.putClientProperty(
+                "JTextField.placeholderText",
+                "ex. Siomai"
+        );
+
+        // ================= CART TABLE MODEL =================
+        // Creates cart table structure
+        javax.swing.table.DefaultTableModel model
+                = new javax.swing.table.DefaultTableModel(
+                        new Object[][]{},
+                        new String[]{
+                            "Item",
+                            "",
+                            "Qty",
+                            "",
+                            "Total",
+                            "",
+                            "ID"
+                        }
+                ) {
+
+            // Prevents table editing
+            boolean[] canEdit = new boolean[]{
+                false, false, false,
+                false, false, false,
+                false
+            };
+
+            @Override
+            public boolean isCellEditable(
+                    int rowIndex,
+                    int columnIndex
+            ) {
+
                 return canEdit[columnIndex];
             }
         };
 
+        // Applies table model
         tblCart.setModel(model);
+
+        // Sets row height
         tblCart.setRowHeight(40);
-        tblCart.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
+        // Changes cursor into hand cursor
+        tblCart.setCursor(
+                new java.awt.Cursor(
+                        java.awt.Cursor.HAND_CURSOR
+                )
+        );
+
+        // Removes table grid lines
         tblCart.setShowGrid(false);
-        tblCart.setIntercellSpacing(new java.awt.Dimension(0, 0));
 
-        tblCart.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 12));
-        tblCart.getTableHeader().setBackground(new java.awt.Color(255, 255, 255));
-        tblCart.getTableHeader().setForeground(new java.awt.Color(100, 116, 139));
-        javax.swing.UIManager.put("TableHeader.separatorColor", new java.awt.Color(0, 0, 0, 0));
+        // Removes spacing between cells
+        tblCart.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Styles table header
+        tblCart.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        12
+                )
+        );
 
+        tblCart.getTableHeader().setBackground(
+                new java.awt.Color(255, 255, 255)
+        );
+
+        tblCart.getTableHeader().setForeground(
+                new java.awt.Color(100, 116, 139)
+        );
+
+        // Removes header separator line
+        javax.swing.UIManager.put(
+                "TableHeader.separatorColor",
+                new java.awt.Color(0, 0, 0, 0)
+        );
+
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblCart.getColumnCount(); i++) {
-            tblCart.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblCart.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
-        if (tblCart.getColumnModel().getColumnCount() > 0) {
-            tblCart.getColumnModel().getColumn(0).setPreferredWidth(120);
-            tblCart.getColumnModel().getColumn(1).setPreferredWidth(30);
-            tblCart.getColumnModel().getColumn(2).setPreferredWidth(30);
-            tblCart.getColumnModel().getColumn(3).setPreferredWidth(30);
-            tblCart.getColumnModel().getColumn(4).setPreferredWidth(70);
-            tblCart.getColumnModel().getColumn(5).setPreferredWidth(30);
+        // Adjusts column widths
+        if (tblCart.getColumnModel()
+                .getColumnCount() > 0) {
 
-            tblCart.getColumnModel().getColumn(6).setMinWidth(0);
-            tblCart.getColumnModel().getColumn(6).setMaxWidth(0);
-            tblCart.getColumnModel().getColumn(6).setWidth(0);
+            tblCart.getColumnModel()
+                    .getColumn(0)
+                    .setPreferredWidth(120);
+
+            tblCart.getColumnModel()
+                    .getColumn(1)
+                    .setPreferredWidth(30);
+
+            tblCart.getColumnModel()
+                    .getColumn(2)
+                    .setPreferredWidth(30);
+
+            tblCart.getColumnModel()
+                    .getColumn(3)
+                    .setPreferredWidth(30);
+
+            tblCart.getColumnModel()
+                    .getColumn(4)
+                    .setPreferredWidth(70);
+
+            tblCart.getColumnModel()
+                    .getColumn(5)
+                    .setPreferredWidth(30);
+
+            // Hides Product ID column
+            tblCart.getColumnModel()
+                    .getColumn(6)
+                    .setMinWidth(0);
+
+            tblCart.getColumnModel()
+                    .getColumn(6)
+                    .setMaxWidth(0);
+
+            tblCart.getColumnModel()
+                    .getColumn(6)
+                    .setWidth(0);
         }
 
-        tblCart.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = tblCart.rowAtPoint(evt.getPoint());
-                int col = tblCart.columnAtPoint(evt.getPoint());
+        // ================= CART BUTTON ACTIONS =================
+        // Handles clicks inside cart table
+        tblCart.addMouseListener(
+                new java.awt.event.MouseAdapter() {
+
+            @Override
+            public void mouseClicked(
+                    java.awt.event.MouseEvent evt
+            ) {
+
+                // Gets clicked row
+                int row
+                        = tblCart.rowAtPoint(
+                                evt.getPoint()
+                        );
+
+                // Gets clicked column
+                int col
+                        = tblCart.columnAtPoint(
+                                evt.getPoint()
+                        );
 
                 if (row >= 0) {
-                    double currentTotal = (double) model.getValueAt(row, 4);
-                    int currentQty = (int) model.getValueAt(row, 2);
-                    double unitPrice = currentTotal / currentQty;
 
+                    // Gets current row total
+                    double currentTotal
+                            = (double) model.getValueAt(
+                                    row,
+                                    4
+                            );
+
+                    // Gets current quantity
+                    int currentQty
+                            = (int) model.getValueAt(
+                                    row,
+                                    2
+                            );
+
+                    // Calculates unit price
+                    double unitPrice
+                            = currentTotal / currentQty;
+
+                    // ================= DECREASE QUANTITY =================
                     if (col == 1) {
+
                         if (currentQty > 1) {
-                            model.setValueAt(currentQty - 1, row, 2);
-                            model.setValueAt((currentQty - 1) * unitPrice, row, 4);
+
+                            model.setValueAt(
+                                    currentQty - 1,
+                                    row,
+                                    2
+                            );
+
+                            model.setValueAt(
+                                    (currentQty - 1)
+                                    * unitPrice,
+                                    row,
+                                    4
+                            );
+
                             updateTotal();
                         }
+
+                        // ================= MANUAL QUANTITY INPUT =================
                     } else if (col == 2) {
-                        String input = javax.swing.JOptionPane.showInputDialog(null, "Enter new quantity:", currentQty);
-                        if (input != null && !input.trim().isEmpty()) {
+
+                        // Opens quantity input dialog
+                        String input
+                                = javax.swing.JOptionPane
+                                        .showInputDialog(
+                                                null,
+                                                "Enter new quantity:",
+                                                currentQty
+                                        );
+
+                        if (input != null
+                                && !input.trim().isEmpty()) {
+
                             try {
-                                int newQty = Integer.parseInt(input.trim());
+
+                                // Converts input into integer
+                                int newQty
+                                        = Integer.parseInt(
+                                                input.trim()
+                                        );
+
+                                // Validation:
+                                // Quantity must be greater than 0
                                 if (newQty <= 0) {
+
                                     JOptionPane.showMessageDialog(
                                             POSPanel.this,
                                             "Quantity must be greater than 0!",
                                             "Invalid Quantity",
                                             JOptionPane.WARNING_MESSAGE
                                     );
+
                                     return;
                                 }
 
-                                model.setValueAt(newQty, row, 2);
-                                model.setValueAt(newQty * unitPrice, row, 4);
+                                // Updates quantity
+                                model.setValueAt(
+                                        newQty,
+                                        row,
+                                        2
+                                );
+
+                                // Updates total price
+                                model.setValueAt(
+                                        newQty * unitPrice,
+                                        row,
+                                        4
+                                );
+
+                                // Recalculates cart total
                                 updateTotal();
 
                             } catch (NumberFormatException ex) {
+
+                                // Shows invalid input error
                                 JOptionPane.showMessageDialog(
                                         POSPanel.this,
                                         "Please enter numbers only for quantity!",
@@ -110,166 +322,381 @@ public class POSPanel extends javax.swing.JPanel {
                                 );
                             }
                         }
+
+                        // ================= INCREASE QUANTITY =================
                     } else if (col == 3) {
-                        model.setValueAt(currentQty + 1, row, 2);
-                        model.setValueAt((currentQty + 1) * unitPrice, row, 4);
+
+                        model.setValueAt(
+                                currentQty + 1,
+                                row,
+                                2
+                        );
+
+                        model.setValueAt(
+                                (currentQty + 1)
+                                * unitPrice,
+                                row,
+                                4
+                        );
+
                         updateTotal();
+
+                        // ================= REMOVE ITEM =================
                     } else if (col == 5) {
+
+                        // Removes selected row
                         model.removeRow(row);
+
+                        // Recalculates cart total
                         updateTotal();
                     }
                 }
             }
         });
 
-        txtCash.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        // ================= CASH INPUT LISTENER =================
+        txtCash.getDocument().addDocumentListener(
+                new javax.swing.event.DocumentListener() {
+
+            @Override
+            public void changedUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 calculateChange();
             }
 
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void removeUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 calculateChange();
             }
 
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void insertUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 calculateChange();
             }
         });
 
-        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        // ================= SEARCH LISTENER =================
+        txtSearch.getDocument().addDocumentListener(
+                new javax.swing.event.DocumentListener() {
+
+            @Override
+            public void changedUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 triggerSearch();
             }
 
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void removeUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 triggerSearch();
             }
 
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void insertUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 triggerSearch();
             }
         });
 
+        // Loads all menu products
         loadMenuCards("", "All");
     }
 
+    // Runs search and category filter
     private void triggerSearch() {
-        String search = txtSearch.getText().trim();
-        String category = cbCategory.getSelectedItem().toString();
+
+        // Gets search text
+        String search
+                = txtSearch.getText().trim();
+
+        // Gets selected category
+        String category
+                = cbCategory.getSelectedItem().toString();
+
+        // Reloads menu cards
         loadMenuCards(search, category);
     }
 
-    public void loadMenuCards(String searchQuery, String categoryFilter) {
+    // Loads product cards from database
+    public void loadMenuCards(
+            String searchQuery,
+            String categoryFilter
+    ) {
+
+        // Removes existing product cards
         menuGrid.removeAll();
 
         try {
-            Connection conn = DBConnection.getConnection();
 
-            StringBuilder sql = new StringBuilder(
-                    "SELECT p.product_id, p.name, p.price, p.image_path "
-                    + "FROM Products p "
-                    + "INNER JOIN Categories c ON p.category_id = c.category_id "
-                    + "WHERE p.is_archived = 0 "
-            );
+            // Connects to database
+            Connection conn
+                    = DBConnection.getConnection();
 
+            // SQL query:
+            // Gets active products with category information
+            StringBuilder sql
+                    = new StringBuilder(
+                            "SELECT p.product_id, "
+                            + "p.name, "
+                            + "p.price, "
+                            + "p.image_path "
+                            + "FROM Products p "
+                            + "INNER JOIN Categories c "
+                            + "ON p.category_id = c.category_id "
+                            + "WHERE p.is_archived = 0 "
+                    );
+
+            // Adds category filter if category is not "All"
             if (!categoryFilter.equals("All")) {
-                sql.append("AND c.category_name = ? ");
+
+                sql.append(
+                        "AND c.category_name = ? "
+                );
             }
 
+            // Adds search filter if search field is not empty
             if (!searchQuery.isEmpty()) {
-                sql.append("AND p.name LIKE ? ");
+
+                sql.append(
+                        "AND p.name LIKE ? "
+                );
             }
 
-            PreparedStatement pstmt = conn.prepareStatement(sql.toString());
+            // Creates PreparedStatement
+            PreparedStatement pstmt
+                    = conn.prepareStatement(
+                            sql.toString()
+                    );
 
+            // Keeps track of parameter index
             int paramIndex = 1;
 
+            // Inserts category filter value
             if (!categoryFilter.equals("All")) {
-                pstmt.setString(paramIndex++, categoryFilter.trim());
+
+                pstmt.setString(
+                        paramIndex++,
+                        categoryFilter.trim()
+                );
             }
 
+            // Inserts search filter value
             if (!searchQuery.isEmpty()) {
-                pstmt.setString(paramIndex++, "%" + searchQuery.trim() + "%");
+
+                pstmt.setString(
+                        paramIndex++,
+                        "%" + searchQuery.trim() + "%"
+                );
             }
 
-            ResultSet rs = pstmt.executeQuery();
+            // Executes SELECT query
+            ResultSet rs
+                    = pstmt.executeQuery();
 
+            // Loops through product records
             while (rs.next()) {
-                int id = rs.getInt("product_id");
-                String name = rs.getString("name");
-                double price = rs.getDouble("price");
-                String imgPath = rs.getString("image_path");
 
-                ProductCard card = new ProductCard(id, name, price, imgPath, this);
+                // Gets product ID
+                int id
+                        = rs.getInt("product_id");
+
+                // Gets product name
+                String name
+                        = rs.getString("name");
+
+                // Gets product price
+                double price
+                        = rs.getDouble("price");
+
+                // Gets image path
+                String imgPath
+                        = rs.getString("image_path");
+
+                // Creates product card
+                ProductCard card
+                        = new ProductCard(
+                                id,
+                                name,
+                                price,
+                                imgPath,
+                                this
+                        );
+
+                // Adds product card into menu grid
                 menuGrid.add(card);
             }
 
+            // Refreshes menu grid
             menuGrid.revalidate();
             menuGrid.repaint();
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
         }
     }
 
-    public void addToCart(int id, String name, double price) {
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+// Adds selected product into cart
+    public void addToCart(
+            int id,
+            String name,
+            double price
+    ) {
 
+        // Gets table model
+        javax.swing.table.DefaultTableModel model
+                = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+
+        // Checks if item already exists in cart
         for (int i = 0; i < model.getRowCount(); i++) {
-            String rowName = (String) model.getValueAt(i, 0);
 
+            // Gets existing item name
+            String rowName
+                    = (String) model.getValueAt(i, 0);
+
+            // If item already exists
             if (rowName.equals(name)) {
-                int currentQty = (int) model.getValueAt(i, 2);
+
+                // Gets current quantity
+                int currentQty
+                        = (int) model.getValueAt(i, 2);
+
+                // Increases quantity
                 int newQty = currentQty + 1;
 
+                // Updates quantity
                 model.setValueAt(newQty, i, 2);
-                model.setValueAt(newQty * price, i, 4);
 
+                // Updates total price
+                model.setValueAt(
+                        newQty * price,
+                        i,
+                        4
+                );
+
+                // Recalculates cart total
                 updateTotal();
+
                 return;
             }
         }
 
-        model.addRow(new Object[]{name, "➖", 1, "➕", price, "🗑", id});
+        // Adds new item into cart
+        model.addRow(new Object[]{
+            name,
+            "➖",
+            1,
+            "➕",
+            price,
+            "🗑",
+            id
+        });
+
+        // Recalculates cart total
         updateTotal();
     }
 
+// Recalculates cart total amount
     private void updateTotal() {
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+
+        // Gets table model
+        javax.swing.table.DefaultTableModel model
+                = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+
+        // Resets total
         currentTotal = 0.0;
 
+        // Loops through cart rows
         for (int i = 0; i < model.getRowCount(); i++) {
-            currentTotal += (double) model.getValueAt(i, 4);
+
+            // Adds item total into overall total
+            currentTotal
+                    += (double) model.getValueAt(i, 4);
         }
 
-        lblTotal.setText(String.format("%.2f", currentTotal));
+        // Displays formatted total amount
+        lblTotal.setText(
+                String.format("%.2f", currentTotal)
+        );
+
+        // Recalculates customer change
         calculateChange();
     }
 
+// Calculates customer change
     private void calculateChange() {
-        try {
-            String cashText = txtCash.getText().trim();
 
+        try {
+
+            // Gets cash input
+            String cashText
+                    = txtCash.getText().trim();
+
+            // Validation:
+            // If cash field is empty
             if (cashText.isEmpty()) {
+
                 lblChange.setText(" 0.00");
-                lblChange.setForeground(new java.awt.Color(102, 102, 102));
+
+                lblChange.setForeground(
+                        new java.awt.Color(102, 102, 102)
+                );
+
                 return;
             }
 
-            double cashReceived = Double.parseDouble(cashText);
-            double change = cashReceived - currentTotal;
+            // Converts cash input into double
+            double cashReceived
+                    = Double.parseDouble(cashText);
 
+            // Calculates change
+            double change
+                    = cashReceived - currentTotal;
+
+            // If cash is insufficient
             if (change < 0) {
+
                 lblChange.setText("Insufficient");
-                lblChange.setForeground(java.awt.Color.RED);
+
+                lblChange.setForeground(
+                        java.awt.Color.RED
+                );
+
             } else {
-                lblChange.setText(String.format(" %.2f", change));
-                lblChange.setForeground(new java.awt.Color(227, 83, 10));
+
+                // Displays calculated change
+                lblChange.setText(
+                        String.format(" %.2f", change)
+                );
+
+                lblChange.setForeground(
+                        new java.awt.Color(227, 83, 10)
+                );
             }
 
         } catch (NumberFormatException e) {
+
+            // Displays invalid input message
             lblChange.setText("Invalid");
-            lblChange.setForeground(java.awt.Color.RED);
+
+            lblChange.setForeground(
+                    java.awt.Color.RED
+            );
         }
     }
 
@@ -544,15 +971,30 @@ public class POSPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbCategoryActionPerformed
-        String search = txtSearch.getText().trim();
-        String category = cbCategory.getSelectedItem().toString();
+        // Gets text from search field
+        String search
+                = txtSearch.getText().trim();
+
+        // Gets selected category from combo box
+        String category
+                = cbCategory.getSelectedItem().toString();
+
+        // Reloads menu cards based on search and category filter
         loadMenuCards(search, category);
     }//GEN-LAST:event_cbCategoryActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+        // Gets cart table model
+        javax.swing.table.DefaultTableModel model
+                = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+
+        // Removes all rows from cart table
         model.setRowCount(0);
+
+        // Clears cash input field
         txtCash.setText("");
+
+        // Recalculates total amount
         updateTotal();
     }//GEN-LAST:event_btnClearActionPerformed
 
@@ -561,97 +1003,265 @@ public class POSPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchActionPerformed
 
     private void btnCheckoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckoutActionPerformed
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblCart.getModel();
+        // Gets cart table model
+        javax.swing.table.DefaultTableModel model
+                = (javax.swing.table.DefaultTableModel) tblCart.getModel();
 
+        // Validation:
+        // Checks if cart is empty
         if (model.getRowCount() == 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "The cart is empty!", "Checkout Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "The cart is empty!",
+                    "Checkout Error",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
+        // Stores customer cash payment
         double cashReceived = 0;
+
         try {
-            cashReceived = Double.parseDouble(txtCash.getText().trim());
+
+            // Converts cash input into double
+            cashReceived = Double.parseDouble(
+                    txtCash.getText().trim()
+            );
+
         } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please enter a valid cash amount.", "Input Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Runs if cash input is invalid
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a valid cash amount.",
+                    "Input Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
+
             return;
         }
 
+        // Validation:
+        // Checks if customer cash is enough
         if (cashReceived < currentTotal) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Insufficient cash! Customer needs ₱ " + String.format("%.2f", (currentTotal - cashReceived)) + " more.", "Payment Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Insufficient cash! Customer needs ₱ "
+                    + String.format(
+                            "%.2f",
+                            (currentTotal - cashReceived)
+                    )
+                    + " more.",
+                    "Payment Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
+
             return;
         }
 
-        String stockCheckSql = "SELECT dbo.fn_CheckProductStock(?) AS stock_left";
-        try (java.sql.Connection checkConn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmtCheck = checkConn.prepareStatement(stockCheckSql)) {
+        // ================= STOCK VALIDATION =================
+        // SQL query:
+        // Calls SQL function to check remaining stock
+        String stockCheckSql
+                = "SELECT dbo.fn_CheckProductStock(?) "
+                + "AS stock_left";
 
+        try (
+                // Connects to database
+                java.sql.Connection checkConn
+                = database.DBConnection.getConnection(); // Creates PreparedStatement
+                 java.sql.PreparedStatement pstmtCheck
+                = checkConn.prepareStatement(stockCheckSql)) {
+
+            // Loops through cart items
             for (int i = 0; i < model.getRowCount(); i++) {
-                int productId = (int) model.getValueAt(i, 6);
-                int requestedQty = (int) model.getValueAt(i, 2);
-                String itemName = (String) model.getValueAt(i, 0);
 
+                // Gets product ID
+                int productId
+                        = (int) model.getValueAt(i, 6);
+
+                // Gets requested quantity
+                int requestedQty
+                        = (int) model.getValueAt(i, 2);
+
+                // Gets item name
+                String itemName
+                        = (String) model.getValueAt(i, 0);
+
+                // Inserts product ID into SQL query
                 pstmtCheck.setInt(1, productId);
-                try (java.sql.ResultSet rsCheck = pstmtCheck.executeQuery()) {
+
+                try (
+                        // Executes stock check query
+                        java.sql.ResultSet rsCheck
+                        = pstmtCheck.executeQuery()) {
+
+                    // Checks if stock exists
                     if (rsCheck.next()) {
-                        int stockLeft = rsCheck.getInt("stock_left");
+
+                        // Gets remaining stock quantity
+                        int stockLeft
+                                = rsCheck.getInt("stock_left");
+
+                        // Validation:
+                        // Checks if requested quantity exceeds stock
                         if (requestedQty > stockLeft) {
-                            javax.swing.JOptionPane.showMessageDialog(this,
-                                    "Checkout Failed: Insufficient Stock!\n\nYou requested " + requestedQty + " of '" + itemName + "', but the kitchen only has " + stockLeft + " left.",
+
+                            javax.swing.JOptionPane.showMessageDialog(
+                                    this,
+                                    "Checkout Failed: Insufficient Stock!\n\n"
+                                    + "You requested "
+                                    + requestedQty
+                                    + " of '"
+                                    + itemName
+                                    + "', but the kitchen only has "
+                                    + stockLeft
+                                    + " left.",
                                     "Out of Stock",
-                                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                                    javax.swing.JOptionPane.WARNING_MESSAGE
+                            );
+
                             return;
                         }
                     }
                 }
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
+
             return;
         }
 
         java.sql.Connection conn = null;
+
         try {
+
+            // Connects to database
             conn = database.DBConnection.getConnection();
+
+            // Starts transaction mode
+            // All queries must succeed together
             conn.setAutoCommit(false);
 
-            String sqlTrans = "INSERT INTO Transactions (user_id, total_amount, cash_tendered, status) VALUES (?, ?, ?, 'COMPLETED')";
-            java.sql.PreparedStatement pstmtTrans = conn.prepareStatement(sqlTrans, java.sql.Statement.RETURN_GENERATED_KEYS);
-            pstmtTrans.setInt(1, LoginPanel.loggedInUserId);
+            // ================= TRANSACTIONS TABLE =================
+            // SQL query for creating transaction record
+            String sqlTrans
+                    = "INSERT INTO Transactions "
+                    + "(user_id, total_amount, cash_tendered, status) "
+                    + "VALUES (?, ?, ?, 'COMPLETED')";
+
+            // RETURN_GENERATED_KEYS gets new transaction ID
+            java.sql.PreparedStatement pstmtTrans
+                    = conn.prepareStatement(
+                            sqlTrans,
+                            java.sql.Statement.RETURN_GENERATED_KEYS
+                    );
+
+            // Inserts logged-in user ID
+            pstmtTrans.setInt(
+                    1,
+                    LoginPanel.loggedInUserId
+            );
+
+            // Inserts total amount
             pstmtTrans.setDouble(2, currentTotal);
+
+            // Inserts customer cash payment
             pstmtTrans.setDouble(3, cashReceived);
+
+            // Executes INSERT query
             pstmtTrans.executeUpdate();
 
-            java.sql.ResultSet rsKeys = pstmtTrans.getGeneratedKeys();
+            // Gets generated transaction ID
+            java.sql.ResultSet rsKeys
+                    = pstmtTrans.getGeneratedKeys();
+
             int transactionId = 0;
+
+            // Checks if transaction was created
             if (rsKeys.next()) {
+
+                // Gets new transaction ID
                 transactionId = rsKeys.getInt(1);
             }
 
-            String sqlDetails = "INSERT INTO Transaction_Details (transaction_id, product_id, quantity, selling_price) VALUES (?, ?, ?, ?)";
-            java.sql.PreparedStatement pstmtDetails = conn.prepareStatement(sqlDetails);
+            // ================= TRANSACTION DETAILS =================
+            // SQL query for transaction details
+            String sqlDetails
+                    = "INSERT INTO Transaction_Details "
+                    + "(transaction_id, product_id, quantity, selling_price) "
+                    + "VALUES (?, ?, ?, ?)";
 
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtDetails
+                    = conn.prepareStatement(sqlDetails);
+
+            // Loops through cart items
             for (int i = 0; i < model.getRowCount(); i++) {
-                int qty = (int) model.getValueAt(i, 2);
-                double lineTotal = (double) model.getValueAt(i, 4);
-                double unitPrice = lineTotal / qty;
 
-                int productId = (int) model.getValueAt(i, 6);
+                // Gets quantity
+                int qty
+                        = (int) model.getValueAt(i, 2);
 
+                // Gets line total
+                double lineTotal
+                        = (double) model.getValueAt(i, 4);
+
+                // Calculates unit price
+                double unitPrice
+                        = lineTotal / qty;
+
+                // Gets product ID
+                int productId
+                        = (int) model.getValueAt(i, 6);
+
+                // Inserts transaction ID
                 pstmtDetails.setInt(1, transactionId);
+
+                // Inserts product ID
                 pstmtDetails.setInt(2, productId);
+
+                // Inserts quantity
                 pstmtDetails.setInt(3, qty);
+
+                // Inserts selling price
                 pstmtDetails.setDouble(4, unitPrice);
 
+                // Adds query into batch
                 pstmtDetails.addBatch();
             }
+
+            // Executes all INSERT queries together
             pstmtDetails.executeBatch();
 
+            // Saves all database changes permanently
             conn.commit();
 
-            double change = cashReceived - currentTotal;
-            double vatableSales = currentTotal / 1.12;
-            double vatAmount = currentTotal - vatableSales;
+            // ================= RECEIPT COMPUTATION =================
+            // Calculates customer change
+            double change
+                    = cashReceived - currentTotal;
 
-            StringBuilder receipt = new StringBuilder();
+            // Calculates VATable sales
+            double vatableSales
+                    = currentTotal / 1.12;
+
+            // Calculates VAT amount
+            double vatAmount
+                    = currentTotal - vatableSales;
+
+            // Creates receipt text
+            StringBuilder receipt
+                    = new StringBuilder();
+
+            // ================= RECEIPT HEADER =================
             receipt.append("==========================================\n");
             receipt.append("              WEEFEE FOODHUB\n");
             receipt.append("        1878 Tayuman St. Sta. Cruz\n");
@@ -662,72 +1272,243 @@ public class POSPanel extends javax.swing.JPanel {
             receipt.append("VAT REG TIN\n");
             receipt.append("MIN: 24010123456789012\n");
             receipt.append("==========================================\n");
-            receipt.append(String.format("Receipt No : %d\n", transactionId));
-            receipt.append(String.format("Date       : %s\n", new java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a").format(new java.util.Date())));
-            receipt.append(String.format("Cashier    : %s\n", LoginPanel.loggedInUsername));
-            receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-22s %-5s %11s\n", "ITEM", "QTY", "TOTAL"));
+
+            // Displays receipt number
+            receipt.append(
+                    String.format(
+                            "Receipt No : %d\n",
+                            transactionId
+                    )
+            );
+
+            // Displays transaction date
+            receipt.append(
+                    String.format(
+                            "Date       : %s\n",
+                            new java.text.SimpleDateFormat(
+                                    "MMM dd, yyyy hh:mm a"
+                            ).format(new java.util.Date())
+                    )
+            );
+
+            // Displays cashier name
+            receipt.append(
+                    String.format(
+                            "Cashier    : %s\n",
+                            LoginPanel.loggedInUsername
+                    )
+            );
+
             receipt.append("------------------------------------------\n");
 
+            // Receipt table header
+            receipt.append(
+                    String.format(
+                            "%-22s %-5s %11s\n",
+                            "ITEM",
+                            "QTY",
+                            "TOTAL"
+                    )
+            );
+
+            receipt.append("------------------------------------------\n");
+
+            // ================= RECEIPT ITEMS =================
+            // Loops through cart items
             for (int i = 0; i < model.getRowCount(); i++) {
-                String rawName = (String) model.getValueAt(i, 0);
-                String itemName = rawName.length() > 18 ? rawName.substring(0, 18) : rawName;
-                int qty = (int) model.getValueAt(i, 2);
-                double lineTotal = (double) model.getValueAt(i, 4);
 
-                receipt.append(String.format("%-22s %-5d   ₱%8.2f\n", itemName, qty, lineTotal));
+                // Gets item name
+                String rawName
+                        = (String) model.getValueAt(i, 0);
+
+                // Shortens long product names
+                String itemName
+                        = rawName.length() > 18
+                        ? rawName.substring(0, 18)
+                        : rawName;
+
+                // Gets quantity
+                int qty
+                        = (int) model.getValueAt(i, 2);
+
+                // Gets line total
+                double lineTotal
+                        = (double) model.getValueAt(i, 4);
+
+                // Adds item into receipt
+                receipt.append(
+                        String.format(
+                                "%-22s %-5d   ₱%8.2f\n",
+                                itemName,
+                                qty,
+                                lineTotal
+                        )
+                );
             }
 
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-25s ₱%11.2f\n", "VATable Sales", vatableSales));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "VAT Amount", vatAmount));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "TOTAL", currentTotal));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "CASH", cashReceived));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "CHANGE", change));
+
+            // Displays VATable sales
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "VATable Sales",
+                            vatableSales
+                    )
+            );
+
+            // Displays VAT amount
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "VAT Amount",
+                            vatAmount
+                    )
+            );
+
+            // Displays total amount
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "TOTAL",
+                            currentTotal
+                    )
+            );
+
+            // Displays customer cash payment
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "CASH",
+                            cashReceived
+                    )
+            );
+
+            // Displays customer change
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "CHANGE",
+                            change
+                    )
+            );
+
             receipt.append("==========================================\n");
             receipt.append("      THIS SERVES AS YOUR SALES INVOICE   \n");
             receipt.append("            THANK YOU! COME AGAIN         \n");
             receipt.append("==========================================\n");
 
-            javax.swing.JTextArea txtReceipt = new javax.swing.JTextArea(receipt.toString());
-            txtReceipt.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14));
+            // ================= RECEIPT DISPLAY =================
+            // Creates text area for receipt
+            javax.swing.JTextArea txtReceipt
+                    = new javax.swing.JTextArea(
+                            receipt.toString()
+                    );
+
+            // Receipt font style
+            txtReceipt.setFont(
+                    new java.awt.Font(
+                            "Monospaced",
+                            java.awt.Font.BOLD,
+                            14
+                    )
+            );
+
+            // Prevents editing
             txtReceipt.setEditable(false);
-            txtReceipt.setBackground(new java.awt.Color(255, 255, 255));
-            txtReceipt.setMargin(new java.awt.Insets(15, 15, 15, 15));
 
-            javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(txtReceipt);
-            scrollPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240)));
+            // White background
+            txtReceipt.setBackground(
+                    new java.awt.Color(255, 255, 255)
+            );
 
-            javax.swing.JOptionPane.showMessageDialog(this, scrollPane, "Transaction Complete", javax.swing.JOptionPane.PLAIN_MESSAGE);
+            // Adds padding
+            txtReceipt.setMargin(
+                    new java.awt.Insets(15, 15, 15, 15)
+            );
 
+            // Creates scroll pane for receipt
+            javax.swing.JScrollPane scrollPane
+                    = new javax.swing.JScrollPane(
+                            txtReceipt
+                    );
+
+            // Adds border
+            scrollPane.setBorder(
+                    javax.swing.BorderFactory.createLineBorder(
+                            new java.awt.Color(226, 232, 240)
+                    )
+            );
+
+            // Displays receipt dialog
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    scrollPane,
+                    "Transaction Complete",
+                    javax.swing.JOptionPane.PLAIN_MESSAGE
+            );
+
+            // Clears cart after successful checkout
             btnClearActionPerformed(null);
 
         } catch (Exception e) {
+
             try {
+
+                // Cancels all database changes if an error happens
                 if (conn != null) {
+
                     conn.rollback();
                 }
+
             } catch (Exception ex) {
+
             }
 
+            // Gets error message
             String errorMsg = e.getMessage();
 
-            if (errorMsg != null && errorMsg.contains("constraint") && errorMsg.contains("current_stock")) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                        "Checkout Failed: Insufficient Stock!\n\nOne or more items in your cart do not have enough stock in the kitchen to complete this sale.",
+            // Handles stock constraint errors
+            if (errorMsg != null
+                    && errorMsg.contains("constraint")
+                    && errorMsg.contains("current_stock")) {
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Checkout Failed: Insufficient Stock!\n\n"
+                        + "One or more items in your cart "
+                        + "do not have enough stock in the kitchen "
+                        + "to complete this sale.",
                         "Out of Stock",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
+
             } else {
+
+                // Prints error in console
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Checkout Failed: " + errorMsg, "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+                // Shows database/system error
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Checkout Failed: " + errorMsg,
+                        "Database Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
             }
 
         } finally {
+
             try {
+
+                // Turns auto-commit back on
                 if (conn != null) {
+
                     conn.setAutoCommit(true);
                 }
+
             } catch (Exception ex) {
+
             }
         }
     }//GEN-LAST:event_btnCheckoutActionPerformed

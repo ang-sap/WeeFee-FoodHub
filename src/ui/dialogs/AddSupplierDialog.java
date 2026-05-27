@@ -1,13 +1,24 @@
 package ui.dialogs;
 
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
 
 public class AddSupplierDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddSupplierDialog.class.getName());
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    AddSupplierDialog.class.getName()
+            );
 
+    // Constructor
+    // Creates the dialog window
     public AddSupplierDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
     }
 
@@ -119,47 +130,102 @@ public class AddSupplierDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtAddressActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String company = txtCompanyName.getText().trim();
-        String contactNo = txtPhone.getText().trim();
-        String address = txtAddress.getText().trim();
+        // Gets company name input
+        String company
+                = txtCompanyName.getText().trim();
 
-        if (company.isEmpty() || contactNo.isEmpty() || address.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please fill in all supplier fields.", "Validation Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Gets phone number input
+        String contactNo
+                = txtPhone.getText().trim();
+
+        // Gets address input
+        String address
+                = txtAddress.getText().trim();
+
+        // Validation:
+        // Checks if fields are empty
+        if (company.isEmpty()
+                || contactNo.isEmpty()
+                || address.isEmpty()) {
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please fill in all supplier fields.",
+                    "Validation Error",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
-        
+
+        // Validation:
+        // Phone number must contain numbers only
         if (!contactNo.matches("\\d+")) {
+
             JOptionPane.showMessageDialog(
                     this,
                     "Phone number must contain numbers only!",
                     "Invalid Phone Number",
                     JOptionPane.WARNING_MESSAGE
             );
+
             return;
         }
 
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sql = "INSERT INTO Suppliers (supplier_name, contact_no, address) VALUES (?, ?, ?)";
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
 
+            // SQL query for inserting supplier
+            String sql
+                    = "INSERT INTO Suppliers "
+                    + "(supplier_name, contact_no, address) "
+                    + "VALUES (?, ?, ?)";
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
+
+            // Inserts company name
             pstmt.setString(1, company);
+
+            // Inserts contact number
             pstmt.setString(2, contactNo);
+
+            // Inserts address
             pstmt.setString(3, address);
 
+            // Executes INSERT query
             pstmt.executeUpdate();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Supplier added successfully!");
+            // Success message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Supplier added successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Database Error: " + e.getMessage(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -189,16 +255,33 @@ public class AddSupplierDialog extends javax.swing.JDialog {
         //</editor-fold>
 
         /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                AddSupplierDialog dialog = new AddSupplierDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
+
+                // Creates dialog window
+                AddSupplierDialog dialog =
+                        new AddSupplierDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
+                            @Override
+                            public void windowClosing(
+                                    java.awt.event.WindowEvent e) {
+
+                                System.exit(0);
+                            }
+                        }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });

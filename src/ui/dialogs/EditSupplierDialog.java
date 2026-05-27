@@ -1,23 +1,49 @@
 package ui.dialogs;
 
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
 
 public class EditSupplierDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditSupplierDialog.class.getName());
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    EditSupplierDialog.class.getName()
+            );
+
+    // Stores the selected supplier ID
     private int currentSupplierId;
 
+    // Default constructor
     public EditSupplierDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
     }
 
-    public EditSupplierDialog(java.awt.Frame parent, boolean modal, int supplierId, String name, String address, String phone) {
+    // Constructor used when editing a supplier
+    public EditSupplierDialog(
+            java.awt.Frame parent,
+            boolean modal,
+            int supplierId,
+            String name,
+            String address,
+            String phone
+    ) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
 
+        // Stores selected supplier ID
         this.currentSupplierId = supplierId;
 
+        // Displays existing supplier information
         txtCompanyName.setText(name);
         txtAddress.setText(address);
         txtPhone.setText(phone);
@@ -131,48 +157,107 @@ public class EditSupplierDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtAddressActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String company = txtCompanyName.getText().trim();
-        String contactNo = txtPhone.getText().trim();
-        String address = txtAddress.getText().trim();
+        // Gets updated supplier name
+        String company
+                = txtCompanyName.getText().trim();
 
-        if (company.isEmpty() || contactNo.isEmpty() || address.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please fill in all supplier fields.", "Validation Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Gets updated phone number
+        String contactNo
+                = txtPhone.getText().trim();
+
+        // Gets updated address
+        String address
+                = txtAddress.getText().trim();
+
+        // Validation:
+        // Checks if fields are empty
+        if (company.isEmpty()
+                || contactNo.isEmpty()
+                || address.isEmpty()) {
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please fill in all supplier fields.",
+                    "Validation Error",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
-        
+
+        // Validation:
+        // Phone number must contain numbers only
         if (!contactNo.matches("\\d+")) {
+
             JOptionPane.showMessageDialog(
                     this,
                     "Phone number must contain numbers only!",
                     "Invalid Phone Number",
                     JOptionPane.WARNING_MESSAGE
             );
+
             return;
         }
 
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sql = "UPDATE Suppliers SET supplier_name = ?, contact_no = ?, address = ? WHERE supplier_id = ?";
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
 
+            // SQL query for updating supplier
+            String sql
+                    = "UPDATE Suppliers "
+                    + "SET supplier_name = ?, "
+                    + "contact_no = ?, "
+                    + "address = ? "
+                    + "WHERE supplier_id = ?";
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
+
+            // Updates supplier name
             pstmt.setString(1, company);
+
+            // Updates phone number
             pstmt.setString(2, contactNo);
+
+            // Updates address
             pstmt.setString(3, address);
+
+            // Selects correct supplier using supplier ID
             pstmt.setInt(4, currentSupplierId);
 
+            // Executes UPDATE query
             pstmt.executeUpdate();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Supplier updated successfully!");
+            // Success message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Supplier updated successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Database Error: " + e.getMessage(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -180,42 +265,42 @@ public class EditSupplierDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPhoneActionPerformed
 
-        /**
-         * @param args the command line arguments
-         */
-        public static void main(String args[]) {
-            /* Set the Nimbus look and feel */
-            //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-            /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-             */
-            try {
-                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                        break;
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+
+        // Opens dialog safely in Event Dispatch Thread
+        java.awt.EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+
+                // Creates dialog window
+                EditSupplierDialog dialog
+                        = new EditSupplierDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
+                    @Override
+                    public void windowClosing(
+                            java.awt.event.WindowEvent e) {
+
+                        System.exit(0);
                     }
                 }
-            } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-                logger.log(java.util.logging.Level.SEVERE, null, ex);
-            }
-            //</editor-fold>
+                );
 
-            /* Create and display the dialog */
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    EditSupplierDialog dialog = new EditSupplierDialog(new javax.swing.JFrame(), true);
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                        @Override
-                        public void windowClosing(java.awt.event.WindowEvent e) {
-                            System.exit(0);
-                        }
-                    });
-                    dialog.setVisible(true);
-                }
-            });
-        }
+                // Displays dialog
+                dialog.setVisible(true);
+            }
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;

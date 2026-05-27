@@ -1,21 +1,44 @@
 package ui;
 
 public class MainFrame extends javax.swing.JFrame {
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
 
+    // Logger used for debugging or error messages
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(MainFrame.class.getName());
+
+    // Default constructor
+    // This runs when the program first starts
     public MainFrame() {
+
+        // Initializes all UI components made in the Form Editor
         initComponents();
-        
-        java.awt.CardLayout cl = (java.awt.CardLayout) getContentPane().getLayout();
-        cl.show(getContentPane(), "card2"); 
+
+        // Gets the CardLayout of the frame
+        java.awt.CardLayout cl
+                = (java.awt.CardLayout) getContentPane().getLayout();
+
+        // Shows the Login Panel first
+        cl.show(getContentPane(), "card2");
     }
 
+    // Constructor with role parameter
+    // Used after successful login
     public MainFrame(String role) {
+
+        // Initializes all UI components
         initComponents();
-        
-        java.awt.CardLayout cl = (java.awt.CardLayout) getContentPane().getLayout();
+
+        // Gets the CardLayout
+        java.awt.CardLayout cl
+                = (java.awt.CardLayout) getContentPane().getLayout();
+
+        // Shows the Dashboard Panel
         cl.show(getContentPane(), "DASHBOARD_CARD");
-        
+
+        // Applies role-based access/security rules
+        // Example:
+        // Admin = full access
+        // Cashier = limited access
         dashboardPanel.applySecurityRules(role);
     }
 
@@ -46,19 +69,35 @@ public class MainFrame extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
+    /**
+     * Main method Starting point of the Java application
+     */
     public static void main(String args[]) {
+
         try {
-            javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
-            
+
+            // Applies FlatLaf modern UI design
+            javax.swing.UIManager.setLookAndFeel(
+                    new com.formdev.flatlaf.FlatLightLaf());
+
+            // Makes buttons have rounded corners
             javax.swing.UIManager.put("Button.arc", 15);
+
+            // Makes components have rounded corners
             javax.swing.UIManager.put("Component.arc", 15);
+
+            // Makes text fields have rounded corners
             javax.swing.UIManager.put("TextComponent.arc", 15);
-            
+
         } catch (Exception ex) {
+
+            // Shows error if FlatLaf fails to load
             System.err.println("Failed to initialize FlatLaf");
         }
-        
-        java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
+
+        // Runs the UI safely in the Event Dispatch Thread
+        java.awt.EventQueue.invokeLater(()
+                -> new MainFrame().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -1,25 +1,47 @@
 package ui.dialogs;
 
+// Imports LoginPanel to get the logged-in user ID
 import ui.auth.LoginPanel;
 
 public class AddExpenseDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AddExpenseDialog.class.getName());
+    // Logger used for debugging or error tracking
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(AddExpenseDialog.class.getName());
 
+    // Constructor
+    // Creates the dialog window
     public AddExpenseDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
+
+        // Runs custom UI setup
         setupExpenseUI();
     }
 
+    // Sets up combo box and date field
     private void setupExpenseUI() {
+
+        // Removes existing items in category combo box
         cbCategory.removeAllItems();
+
+        // Adds expense categories
         cbCategory.addItem("Rent");
         cbCategory.addItem("Bills");
         cbCategory.addItem("Misc");
 
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // Creates date format
+        java.text.SimpleDateFormat sdf
+                = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // Displays current date and time
         txtDate.setText(sdf.format(new java.util.Date()));
+
+        // Prevents user from editing the date
         txtDate.setEditable(false);
     }
 
@@ -164,52 +186,126 @@ public class AddExpenseDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtDateActionPerformed
 
     private void txtAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAmountActionPerformed
+        // Automatically triggers Save button
         btnSaveActionPerformed(evt);
     }//GEN-LAST:event_txtAmountActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes the dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String category = cbCategory.getSelectedItem().toString();
-        String amountText = txtAmount.getText().trim();
-        String remarks = txtRemarks.getText().trim();
+        // Gets selected category
+        String category =
+                cbCategory.getSelectedItem().toString();
 
+        // Gets entered amount
+        String amountText =
+                txtAmount.getText().trim();
+
+        // Gets remarks
+        String remarks =
+                txtRemarks.getText().trim();
+
+        // Validation:
+        // Checks if amount field is empty
         if (amountText.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please enter an expense amount.", "Validation Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter an expense amount.",
+                    "Validation Error",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
         try {
-            double amount = Double.parseDouble(amountText);
 
+            // Converts text into double value
+            double amount =
+                    Double.parseDouble(amountText);
+
+            // Validation:
+            // Amount must be greater than 0
             if (amount <= 0) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Amount must be greater than zero.", "Validation Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Amount must be greater than zero.",
+                        "Validation Error",
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
+
                 return;
             }
 
-            java.sql.Connection conn = database.DBConnection.getConnection();
+            // Connects to database
+            java.sql.Connection conn =
+                    database.DBConnection.getConnection();
 
-            String sql = "INSERT INTO Expenses (user_id, category, description, amount, date_paid, status) VALUES (?, ?, ?, ?, GETDATE(), 'COMPLETED')";
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            // SQL query for inserting expense
+            String sql =
+                    "INSERT INTO Expenses " +
+                    "(user_id, category, description, amount, date_paid, status) " +
+                    "VALUES (?, ?, ?, ?, GETDATE(), 'COMPLETED')";
 
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmt =
+                    conn.prepareStatement(sql);
+
+            // Inserts logged-in user ID
             pstmt.setInt(1, LoginPanel.loggedInUserId);
+
+            // Inserts category
             pstmt.setString(2, category);
-            pstmt.setString(3, remarks.isEmpty() ? null : remarks);
+
+            // Inserts remarks
+            // If remarks are empty, NULL will be saved
+            pstmt.setString(
+                    3,
+                    remarks.isEmpty() ? null : remarks
+            );
+
+            // Inserts amount
             pstmt.setDouble(4, amount);
 
+            // Executes INSERT query
             pstmt.executeUpdate();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Operating expense recorded successfully!");
+            // Success message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Operating expense recorded successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount.", "Input Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Runs if amount is not numeric
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a valid numeric amount.",
+                    "Input Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Database Error: " + e.getMessage(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -234,17 +330,33 @@ public class AddExpenseDialog extends javax.swing.JDialog {
         }
         //</editor-fold>
 
-        /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                AddExpenseDialog dialog = new AddExpenseDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+
+                // Creates AddExpenseDialog
+                AddExpenseDialog dialog
+                        = new AddExpenseDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
                     @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
+                    public void windowClosing(
+                            java.awt.event.WindowEvent e) {
+
                         System.exit(0);
                     }
-                });
+                }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });

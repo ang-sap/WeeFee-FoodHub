@@ -4,39 +4,58 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 public class LoginPanel extends javax.swing.JPanel {
 
+    // Stores the currently logged-in user's ID
     public static int loggedInUserId = 1;
+
+    // Stores the currently logged-in username
     public static String loggedInUsername = "Admin";
 
+    // Constructor
+    // Runs when the Login Panel is created
     public LoginPanel() {
+
+        // Initializes all UI components from NetBeans Form Editor
         initComponents();
+
+        // Placeholder text shown inside the username field
         txtUsername.putClientProperty("JTextField.placeholderText", "admin or staff");
+
+        // Placeholder text shown inside the password field
         txtPassword.putClientProperty("JTextField.placeholderText", "••••••••");
 
+        // Loads SVG icons for username and password fields
         FlatSVGIcon userIcon = new FlatSVGIcon("icons/user.svg", 16, 16);
         FlatSVGIcon lockIcon = new FlatSVGIcon("icons/lock.svg", 16, 16);
 
+        // Adds icons inside the text fields
         txtUsername.putClientProperty("JTextField.leadingIcon", userIcon);
         txtPassword.putClientProperty("JTextField.leadingIcon", lockIcon);
 
+        // Adds spacing between icon and text
         txtUsername.putClientProperty("JTextField.iconTextGap", 16);
         txtPassword.putClientProperty("JTextField.iconTextGap", 16);
 
+        // Adds left padding inside the text fields
         java.awt.Insets textPadding = new java.awt.Insets(0, 12, 0, 0);
+
         txtUsername.putClientProperty("JTextField.padding", textPadding);
         txtPassword.putClientProperty("JTextField.padding", textPadding);
 
+        // Creates the system's orange brand color
         java.awt.Color brandOrange = new java.awt.Color(249, 115, 22);
 
+        // Changes border color when text field is focused
         txtUsername.putClientProperty("JComponent.focusColor", brandOrange);
         txtPassword.putClientProperty("JComponent.focusColor", brandOrange);
 
+        // Changes highlighted text color
         txtUsername.setSelectionColor(brandOrange);
         txtPassword.setSelectionColor(brandOrange);
 
+        // Sets the logo icon
         logoLabel.setIcon(
                 new FlatSVGIcon("icons/utensils-crossed.svg", 28, 28)
         );
-
     }
 
     /**
@@ -216,47 +235,113 @@ public class LoginPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_txtUsernameActionPerformed
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+        // Gets the entered username
         String username = txtUsername.getText();
+
+        // Gets the entered password
         String password = new String(txtPassword.getPassword());
 
+        // Checks if username or password is empty
         if (username.isEmpty() || password.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please enter both Username and Password.");
+
+            // Shows warning message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter both Username and Password."
+            );
+
             return;
         }
 
-        try (java.sql.Connection conn = database.DBConnection.getConnection()) {
+        // Connects to the database
+        try (java.sql.Connection conn
+                = database.DBConnection.getConnection()) {
 
-            String sql = "SELECT user_id, username, role FROM Users WHERE username = ? AND password = ?";
-            try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // SQL query to check if username and password exist
+            String sql
+                    = "SELECT user_id, username, role FROM Users WHERE username = ? AND password = ?";
+
+            // PreparedStatement prevents SQL Injection
+            try (java.sql.PreparedStatement pstmt
+                    = conn.prepareStatement(sql)) {
+
+                // Replaces first ? with username
                 pstmt.setString(1, username);
+
+                // Replaces second ? with password
                 pstmt.setString(2, password);
 
+                // Executes the query
                 try (java.sql.ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        loggedInUserId = rs.getInt("user_id");
-                        loggedInUsername = rs.getString("username");
-                        String userRole = rs.getString("role").trim();
 
-                        String logSql = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'USER_LOGIN', ?)";
-                        try (java.sql.PreparedStatement logStmt = conn.prepareStatement(logSql)) {
+                    // Checks if matching account exists
+                    if (rs.next()) {
+
+                        // Stores logged-in user's ID
+                        loggedInUserId = rs.getInt("user_id");
+
+                        // Stores logged-in username
+                        loggedInUsername = rs.getString("username");
+
+                        // Gets user role
+                        String userRole
+                                = rs.getString("role").trim();
+
+                        // SQL query for Audit Log
+                        String logSql
+                                = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'USER_LOGIN', ?)";
+
+                        // Saves login activity into AuditLogs table
+                        try (java.sql.PreparedStatement logStmt
+                                = conn.prepareStatement(logSql)) {
+
+                            // Inserts user ID
                             logStmt.setInt(1, loggedInUserId);
-                            logStmt.setString(2, loggedInUsername + " successfully logged into the system.");
+
+                            // Inserts login description
+                            logStmt.setString(
+                                    2,
+                                    loggedInUsername + " successfully logged into the system."
+                            );
+
+                            // Executes insert query
                             logStmt.executeUpdate();
                         }
 
-                        ui.MainFrame mainApp = new ui.MainFrame(userRole);
+                        // Opens MainFrame dashboard
+                        ui.MainFrame mainApp
+                                = new ui.MainFrame(userRole);
+
                         mainApp.setVisible(true);
 
-                        javax.swing.SwingUtilities.getWindowAncestor(this).dispose();
+                        // Closes Login Window
+                        javax.swing.SwingUtilities
+                                .getWindowAncestor(this)
+                                .dispose();
 
                     } else {
-                        javax.swing.JOptionPane.showMessageDialog(this, "Invalid Username or Password!", "Login Failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+                        // Runs if username/password is incorrect
+                        javax.swing.JOptionPane.showMessageDialog(
+                                this,
+                                "Invalid Username or Password!",
+                                "Login Failed",
+                                javax.swing.JOptionPane.ERROR_MESSAGE
+                        );
                     }
                 }
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
+
+            // Shows database error message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Database Error: " + e.getMessage()
+            );
         }
     }//GEN-LAST:event_loginBtnActionPerformed
 

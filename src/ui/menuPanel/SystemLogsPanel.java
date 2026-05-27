@@ -1,78 +1,195 @@
 package ui.menuPanel;
 
+// Imports Swing constants for alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class SystemLogsPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when SystemLogsPanel is created
     public SystemLogsPanel() {
+
+        // Initializes all UI components
         initComponents();
 
-        txtSearchLogs.putClientProperty("JTextField.placeholderText", "Search by action, user, or details...");
-        tblLogs.getTableHeader().setFont(new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 12));
-        tblLogs.getTableHeader().setBackground(new java.awt.Color(245, 245, 245));
-        tblLogs.getTableHeader().setForeground(new java.awt.Color(80, 80, 80));
-        tblLogs.setIntercellSpacing(new java.awt.Dimension(0, 0));
+        // Placeholder text for search field
+        txtSearchLogs.putClientProperty(
+                "JTextField.placeholderText",
+                "Search by action, user, or details..."
+        );
+
+        // Styles the table header font
+        tblLogs.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        12
+                )
+        );
+
+        // Changes table header background color
+        tblLogs.getTableHeader().setBackground(
+                new java.awt.Color(245, 245, 245)
+        );
+
+        // Changes table header text color
+        tblLogs.getTableHeader().setForeground(
+                new java.awt.Color(80, 80, 80)
+        );
+
+        // Removes spacing between table cells
+        tblLogs.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
         tblLogs.setShowGrid(false);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
 
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblLogs.getColumnCount(); i++) {
-            tblLogs.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblLogs.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
-        txtSearchLogs.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        // ================= LIVE SEARCH LISTENER =================
+
+        // Automatically reloads logs while typing
+        txtSearchLogs.getDocument().addDocumentListener(
+                new javax.swing.event.DocumentListener() {
+
+            @Override
+            public void changedUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadLogs(txtSearchLogs.getText());
             }
 
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void removeUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadLogs(txtSearchLogs.getText());
             }
 
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void insertUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadLogs(txtSearchLogs.getText());
             }
         });
 
+        // Loads all logs initially
         loadLogs("");
     }
 
+    // Loads audit logs from database
     public void loadLogs(String searchQuery) {
-        try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sql = "SELECT a.log_id, a.log_date, ISNULL(u.username, 'System') AS username, a.action, a.description "
+        try {
+
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // SQL query:
+            // Gets audit logs with username information
+            String sql
+                    = "SELECT a.log_id, "
+                    + "a.log_date, "
+                    + "ISNULL(u.username, 'System') "
+                    + "AS username, "
+                    + "a.action, "
+                    + "a.description "
                     + "FROM AuditLogs a "
-                    + "LEFT JOIN Users u ON a.user_id = u.user_id "
-                    + "WHERE a.action LIKE ? OR a.description LIKE ? OR ISNULL(u.username, '') LIKE ? "
+                    + "LEFT JOIN Users u "
+                    + "ON a.user_id = u.user_id "
+                    + "WHERE a.action LIKE ? "
+                    + "OR a.description LIKE ? "
+                    + "OR ISNULL(u.username, '') LIKE ? "
                     + "ORDER BY a.log_id DESC";
 
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-            String searchParam = "%" + searchQuery.trim() + "%";
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
+
+            // Adds wildcard search filter
+            String searchParam
+                    = "%" + searchQuery.trim() + "%";
+
+            // Inserts search parameters
             pstmt.setString(1, searchParam);
             pstmt.setString(2, searchParam);
             pstmt.setString(3, searchParam);
 
-            java.sql.ResultSet rs = pstmt.executeQuery();
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblLogs.getModel();
+            // Executes SELECT query
+            java.sql.ResultSet rs
+                    = pstmt.executeQuery();
+
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel)
+                            tblLogs.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a");
+            // Date format for log timestamp
+            java.text.SimpleDateFormat sdf
+                    = new java.text.SimpleDateFormat(
+                            "MMM dd, yyyy - hh:mm a"
+                    );
 
+            // Loops through audit log records
             while (rs.next()) {
+
+                // Adds row into table
                 model.addRow(new Object[]{
                     rs.getInt("log_id"),
-                    sdf.format(rs.getTimestamp("log_date")),
+
+                    // Formats date and time
+                    sdf.format(
+                            rs.getTimestamp("log_date")
+                    ),
+
                     rs.getString("username"),
                     rs.getString("action"),
-                    rs.getString("description") != null ? rs.getString("description") : ""
+
+                    // Displays blank if description is null
+                    rs.getString("description") != null
+                    ? rs.getString("description")
+                    : ""
                 });
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading system logs: " + e.getMessage());
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading system logs: "
+                    + e.getMessage()
+            );
         }
     }
 
@@ -173,10 +290,12 @@ public class SystemLogsPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtSearchLogsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchLogsActionPerformed
-        loadLogs(txtSearchLogs.getText()); // Trigger search when they hit Enter
+        // Reloads logs using search text
+        loadLogs(txtSearchLogs.getText());
     }//GEN-LAST:event_txtSearchLogsActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // Reloads logs using search text
         loadLogs(txtSearchLogs.getText());
     }//GEN-LAST:event_btnSearchActionPerformed
 

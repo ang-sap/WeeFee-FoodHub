@@ -1,29 +1,61 @@
 package ui.dialogs;
 
+// Imports database connection class
+import database.DBConnection;
+
+// Imports SQL classes
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
-import database.DBConnection;
 
 public class UpdateStockDialog extends javax.swing.JDialog {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateStockDialog.class.getName());
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    UpdateStockDialog.class.getName()
+            );
 
+    // Stores selected product ID
     private int productId;
 
+    // Default constructor
     public UpdateStockDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
     }
 
-    public UpdateStockDialog(java.awt.Frame parent, boolean modal, int id, String name, int currentStock) {
+    // Constructor used when updating stock
+    public UpdateStockDialog(
+            java.awt.Frame parent,
+            boolean modal,
+            int id,
+            String name,
+            int currentStock
+    ) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
 
+        // Stores selected product ID
         this.productId = id;
 
+        // Displays product name
         lblProductName.setText(name);
-        txtNewStock.setText(String.valueOf(currentStock));
+
+        // Displays current stock
+        txtNewStock.setText(
+                String.valueOf(currentStock)
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -131,51 +163,120 @@ public class UpdateStockDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtNewStockActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String stockText = txtNewStock.getText().trim();
+        // Gets entered stock value
+        String stockText
+                = txtNewStock.getText().trim();
 
+        // Validation:
+        // Checks if stock field is empty
         if (stockText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a stock value.", "Empty Field", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a stock value.",
+                    "Empty Field",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
         try {
-            int newStock = Integer.parseInt(stockText);
 
+            // Converts stock text into integer value
+            int newStock
+                    = Integer.parseInt(stockText);
+
+            // Validation:
+            // Stock cannot be negative
             if (newStock < 0) {
-                JOptionPane.showMessageDialog(this, "Stock cannot be a negative number!", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Stock cannot be a negative number!",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE
+                );
+
                 return;
             }
 
-            Connection conn = DBConnection.getConnection();
+            // Connects to database
+            Connection conn
+                    = DBConnection.getConnection();
 
-            String sql = "IF EXISTS (SELECT 1 FROM Inventory WHERE product_id = ?) "
-                    + "  UPDATE Inventory SET current_stock = ? WHERE product_id = ? "
+            // SQL query:
+            // If inventory record exists → UPDATE stock
+            // If inventory record does not exist → INSERT new stock record
+            String sql
+                    = "IF EXISTS "
+                    + "(SELECT 1 FROM Inventory WHERE product_id = ?) "
+                    + " UPDATE Inventory "
+                    + " SET current_stock = ? "
+                    + " WHERE product_id = ? "
                     + "ELSE "
-                    + "  INSERT INTO Inventory (product_id, current_stock) VALUES (?, ?)";
+                    + " INSERT INTO Inventory "
+                    + "(product_id, current_stock) "
+                    + " VALUES (?, ?)";
 
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            // Creates PreparedStatement
+            PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
 
+            // Checks if product exists
             pstmt.setInt(1, productId);
+
+            // Updates stock quantity
             pstmt.setInt(2, newStock);
+
+            // Selects correct product
             pstmt.setInt(3, productId);
+
+            // Inserts product ID if inventory record does not exist
             pstmt.setInt(4, productId);
+
+            // Inserts new stock quantity
             pstmt.setInt(5, newStock);
 
+            // Executes UPDATE or INSERT query
             pstmt.executeUpdate();
 
-            JOptionPane.showMessageDialog(this, "Stock updated successfully!");
+            // Success message
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Stock updated successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid whole number.", "Input Error", JOptionPane.ERROR_MESSAGE);
+
+            // Runs if stock input is not a whole number
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a valid whole number.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Database Error: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -183,34 +284,34 @@ public class UpdateStockDialog extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                UpdateStockDialog dialog = new UpdateStockDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+
+                // Creates dialog window
+                UpdateStockDialog dialog
+                        = new UpdateStockDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
                     @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
+                    public void windowClosing(
+                            java.awt.event.WindowEvent e) {
+
                         System.exit(0);
                     }
-                });
+                }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });

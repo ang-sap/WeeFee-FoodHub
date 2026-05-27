@@ -1,86 +1,186 @@
 package ui.menuPanel;
 
+// Imports Swing constants for alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports LoginPanel to get logged-in user ID
 import ui.auth.LoginPanel;
 
 public class TransactionsPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when TransactionsPanel is created
     public TransactionsPanel() {
-        initComponents();
-        
-        txtSearchLogs.putClientProperty("JTextField.placeholderText", "Search by Receipt ID or Cashier Name");
 
-        tblTransactions.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+        // Initializes all UI components
+        initComponents();
+
+        // Placeholder text for search field
+        txtSearchLogs.putClientProperty(
+                "JTextField.placeholderText",
+                "Search by Receipt ID or Cashier Name"
         );
+
+        // Styles the table header font
+        tblTransactions.getTableHeader().setFont(
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
+        );
+
+        // Changes table header background color
         tblTransactions.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblTransactions.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblTransactions.setIntercellSpacing(new java.awt.Dimension(0, 0));
-        tblTransactions.setShowGrid(false);
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Removes spacing between table cells
+        tblTransactions.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
+        tblTransactions.setShowGrid(false);
+
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblTransactions.getColumnCount(); i++) {
-            tblTransactions.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblTransactions.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
-        txtSearchLogs.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        // ================= LIVE SEARCH LISTENER =================
+        // Automatically reloads transactions while typing
+        txtSearchLogs.getDocument().addDocumentListener(
+                new javax.swing.event.DocumentListener() {
+
+            @Override
+            public void changedUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadTransactions(txtSearchLogs.getText());
             }
 
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void removeUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadTransactions(txtSearchLogs.getText());
             }
 
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            @Override
+            public void insertUpdate(
+                    javax.swing.event.DocumentEvent e
+            ) {
+
                 loadTransactions(txtSearchLogs.getText());
             }
         });
 
+        // Loads all transactions initially
         loadTransactions("");
     }
 
+    // Loads transaction records from database
     public void loadTransactions(String searchQuery) {
-        String sql = "SELECT t.transaction_id, t.transaction_date, u.username, t.total_amount, t.status "
-                   + "FROM Transactions t "
-                   + "INNER JOIN Users u ON t.user_id = u.user_id "
-                   + "WHERE u.username LIKE ? OR CAST(t.transaction_id AS VARCHAR) LIKE ? "
-                   + "ORDER BY t.transaction_id DESC";
 
-       
-        try (java.sql.Connection conn = database.DBConnection.getConnection();
-             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
-            String searchParam = "%" + searchQuery.trim() + "%";
+        // SQL query:
+        // Gets transaction history with cashier username
+        String sql
+                = "SELECT t.transaction_id, "
+                + "t.transaction_date, "
+                + "u.username, "
+                + "t.total_amount, "
+                + "t.status "
+                + "FROM Transactions t "
+                + "INNER JOIN Users u "
+                + "ON t.user_id = u.user_id "
+                + "WHERE u.username LIKE ? "
+                + "OR CAST(t.transaction_id AS VARCHAR) LIKE ? "
+                + "ORDER BY t.transaction_id DESC";
+
+        try (
+                // Connects to database
+                java.sql.Connection conn
+                = database.DBConnection.getConnection(); // Creates PreparedStatement
+                 java.sql.PreparedStatement pstmt
+                = conn.prepareStatement(sql)) {
+
+            // Adds wildcard search filter
+            String searchParam
+                    = "%" + searchQuery.trim() + "%";
+
+            // Inserts search parameters
             pstmt.setString(1, searchParam);
             pstmt.setString(2, searchParam);
 
-            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblTransactions.getModel();
-                model.setRowCount(0); 
+            try (
+                    // Executes SELECT query
+                    java.sql.ResultSet rs
+                    = pstmt.executeQuery()) {
 
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a");
+                // Gets table model
+                javax.swing.table.DefaultTableModel model
+                        = (javax.swing.table.DefaultTableModel) tblTransactions.getModel();
 
+                // Clears existing rows
+                model.setRowCount(0);
+
+                // Date format for transaction timestamp
+                java.text.SimpleDateFormat sdf
+                        = new java.text.SimpleDateFormat(
+                                "MMM dd, yyyy - hh:mm a"
+                        );
+
+                // Loops through transaction records
                 while (rs.next()) {
+
+                    // Adds row into table
                     model.addRow(new Object[]{
                         rs.getInt("transaction_id"),
-                        sdf.format(rs.getTimestamp("transaction_date")),
+                        // Formats date and time
+                        sdf.format(
+                        rs.getTimestamp("transaction_date")
+                        ),
                         rs.getString("username"),
                         rs.getDouble("total_amount"),
                         rs.getString("status")
                     });
                 }
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading transactions: " + e.getMessage());
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading transactions: "
+                    + e.getMessage()
+            );
         }
     }
 
@@ -206,46 +306,109 @@ public class TransactionsPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        // TODO add your handling code here:
+        // Reloads transactions using search text
+        loadTransactions(txtSearchLogs.getText());
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnViewDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewDetailsActionPerformed
-        int selectedRow = tblTransactions.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblTransactions.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a transaction to view.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a transaction to view.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int transactionId = (int) tblTransactions.getValueAt(selectedRow, 0);
+        // Gets selected transaction ID
+        int transactionId
+                = (int) tblTransactions.getValueAt(
+                        selectedRow,
+                        0
+                );
 
         try {
-            java.sql.Connection conn = database.DBConnection.getConnection();
 
-            String sqlHeader = "SELECT u.username, t.total_amount, t.cash_tendered, t.transaction_date "
-                    + "FROM Transactions t INNER JOIN Users u ON t.user_id = u.user_id "
+            // Connects to database
+            java.sql.Connection conn
+                    = database.DBConnection.getConnection();
+
+            // ================= TRANSACTION HEADER =================
+            // SQL query:
+            // Gets transaction header information
+            String sqlHeader
+                    = "SELECT u.username, "
+                    + "t.total_amount, "
+                    + "t.cash_tendered, "
+                    + "t.transaction_date "
+                    + "FROM Transactions t "
+                    + "INNER JOIN Users u "
+                    + "ON t.user_id = u.user_id "
                     + "WHERE t.transaction_id = ?";
-            java.sql.PreparedStatement pstmtHeader = conn.prepareStatement(sqlHeader);
-            pstmtHeader.setInt(1, transactionId);
-            java.sql.ResultSet rsHeader = pstmtHeader.executeQuery();
 
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtHeader
+                    = conn.prepareStatement(sqlHeader);
+
+            // Selects correct transaction
+            pstmtHeader.setInt(1, transactionId);
+
+            // Executes SELECT query
+            java.sql.ResultSet rsHeader
+                    = pstmtHeader.executeQuery();
+
+            // Default values
             String cashierName = "Unknown";
             double totalAmount = 0.0;
             double cashReceived = 0.0;
             String date = "";
 
+            // Gets transaction information
             if (rsHeader.next()) {
-                cashierName = rsHeader.getString("username");
-                totalAmount = rsHeader.getDouble("total_amount");
-                cashReceived = rsHeader.getDouble("cash_tendered");
-                date = new java.text.SimpleDateFormat("MMM dd, yyyy hh:mm a").format(rsHeader.getTimestamp("transaction_date"));
+
+                cashierName
+                        = rsHeader.getString("username");
+
+                totalAmount
+                        = rsHeader.getDouble("total_amount");
+
+                cashReceived
+                        = rsHeader.getDouble("cash_tendered");
+
+                // Formats transaction date
+                date = new java.text.SimpleDateFormat(
+                        "MMM dd, yyyy hh:mm a"
+                ).format(
+                        rsHeader.getTimestamp("transaction_date")
+                );
             }
 
-            double change = cashReceived - totalAmount;
-            double vatableSales = totalAmount / 1.12;
-            double vatAmount = totalAmount - vatableSales;
+            // Calculates customer change
+            double change
+                    = cashReceived - totalAmount;
 
-            StringBuilder receipt = new StringBuilder();
+            // Calculates VATable sales
+            double vatableSales
+                    = totalAmount / 1.12;
+
+            // Calculates VAT amount
+            double vatAmount
+                    = totalAmount - vatableSales;
+
+            // Creates receipt text
+            StringBuilder receipt
+                    = new StringBuilder();
+
+            // ================= RECEIPT HEADER =================
             receipt.append("==========================================\n");
             receipt.append("              WEEFEE FOODHUB\n");
             receipt.append("        1878 Tayuman St. Sta. Cruz\n");
@@ -256,144 +419,484 @@ public class TransactionsPanel extends javax.swing.JPanel {
             receipt.append("VAT REG TIN\n");
             receipt.append("MIN: 24010123456789012\n");
             receipt.append("==========================================\n");
-            receipt.append(String.format("Receipt No : %d\n", transactionId));
-            receipt.append(String.format("Date       : %s\n", date));
-            receipt.append(String.format("Cashier    : %s\n", cashierName));
-            receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-22s %-5s %11s\n", "ITEM", "QTY", "TOTAL"));
+
+            receipt.append(
+                    String.format(
+                            "Receipt No : %d\n",
+                            transactionId
+                    )
+            );
+
+            receipt.append(
+                    String.format(
+                            "Date       : %s\n",
+                            date
+                    )
+            );
+
+            receipt.append(
+                    String.format(
+                            "Cashier    : %s\n",
+                            cashierName
+                    )
+            );
+
             receipt.append("------------------------------------------\n");
 
-            String sqlItems = "SELECT p.name, td.quantity, td.selling_price, (td.quantity * td.selling_price) AS subtotal "
+            receipt.append(
+                    String.format(
+                            "%-22s %-5s %11s\n",
+                            "ITEM",
+                            "QTY",
+                            "TOTAL"
+                    )
+            );
+
+            receipt.append("------------------------------------------\n");
+
+            // ================= RECEIPT ITEMS =================
+            // SQL query:
+            // Gets purchased items
+            String sqlItems
+                    = "SELECT p.name, "
+                    + "td.quantity, "
+                    + "td.selling_price, "
+                    + "(td.quantity * td.selling_price) "
+                    + "AS subtotal "
                     + "FROM Transaction_Details td "
-                    + "INNER JOIN Products p ON td.product_id = p.product_id "
+                    + "INNER JOIN Products p "
+                    + "ON td.product_id = p.product_id "
                     + "WHERE td.transaction_id = ?";
-            java.sql.PreparedStatement pstmtItems = conn.prepareStatement(sqlItems);
+
+            // Creates PreparedStatement
+            java.sql.PreparedStatement pstmtItems
+                    = conn.prepareStatement(sqlItems);
+
+            // Selects correct transaction
             pstmtItems.setInt(1, transactionId);
-            java.sql.ResultSet rsItems = pstmtItems.executeQuery();
 
+            // Executes SELECT query
+            java.sql.ResultSet rsItems
+                    = pstmtItems.executeQuery();
+
+            // Loops through purchased items
             while (rsItems.next()) {
-                String rawName = rsItems.getString("name");
-                String itemName = rawName.length() > 18 ? rawName.substring(0, 18) : rawName;
-                int qty = rsItems.getInt("quantity");
-                double subtotal = rsItems.getDouble("subtotal");
 
-                receipt.append(String.format("%-22s %-5d   ₱%8.2f\n", itemName, qty, subtotal));
+                // Gets product name
+                String rawName
+                        = rsItems.getString("name");
+
+                // Shortens long product names
+                String itemName
+                        = rawName.length() > 18
+                        ? rawName.substring(0, 18)
+                        : rawName;
+
+                // Gets quantity
+                int qty
+                        = rsItems.getInt("quantity");
+
+                // Gets subtotal
+                double subtotal
+                        = rsItems.getDouble("subtotal");
+
+                // Adds item into receipt
+                receipt.append(
+                        String.format(
+                                "%-22s %-5d   ₱%8.2f\n",
+                                itemName,
+                                qty,
+                                subtotal
+                        )
+                );
             }
 
             receipt.append("------------------------------------------\n");
-            receipt.append(String.format("%-25s ₱%11.2f\n", "VATable Sales", vatableSales));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "VAT Amount", vatAmount));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "TOTAL", totalAmount));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "CASH", cashReceived));
-            receipt.append(String.format("%-25s ₱%11.2f\n", "CHANGE", change));
+
+            // Displays VATable sales
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "VATable Sales",
+                            vatableSales
+                    )
+            );
+
+            // Displays VAT amount
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "VAT Amount",
+                            vatAmount
+                    )
+            );
+
+            // Displays total amount
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "TOTAL",
+                            totalAmount
+                    )
+            );
+
+            // Displays customer cash payment
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "CASH",
+                            cashReceived
+                    )
+            );
+
+            // Displays customer change
+            receipt.append(
+                    String.format(
+                            "%-25s ₱%11.2f\n",
+                            "CHANGE",
+                            change
+                    )
+            );
+
             receipt.append("==========================================\n");
             receipt.append("      THIS SERVES AS YOUR SALES INVOICE   \n");
             receipt.append("            THANK YOU! COME AGAIN         \n");
             receipt.append("==========================================\n");
 
-            javax.swing.JTextArea txtReceipt = new javax.swing.JTextArea(receipt.toString());
-            txtReceipt.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14)); 
+            // ================= RECEIPT DISPLAY =================
+            // Creates text area for receipt
+            javax.swing.JTextArea txtReceipt
+                    = new javax.swing.JTextArea(
+                            receipt.toString()
+                    );
+
+            // Receipt font style
+            txtReceipt.setFont(
+                    new java.awt.Font(
+                            "Monospaced",
+                            java.awt.Font.BOLD,
+                            14
+                    )
+            );
+
+            // Prevents editing
             txtReceipt.setEditable(false);
-            txtReceipt.setBackground(new java.awt.Color(255, 255, 255));
-            txtReceipt.setForeground(new java.awt.Color(15, 23, 42));
-            txtReceipt.setMargin(new java.awt.Insets(20, 20, 20, 20)); 
 
-            javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(txtReceipt);
-            scrollPane.setPreferredSize(new java.awt.Dimension(400, 500));
-            scrollPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(226, 232, 240)));
+            // White background
+            txtReceipt.setBackground(
+                    new java.awt.Color(255, 255, 255)
+            );
 
-        
-            javax.swing.JOptionPane.showMessageDialog(this, scrollPane, "Digital Receipt", javax.swing.JOptionPane.PLAIN_MESSAGE);
+            // Dark text color
+            txtReceipt.setForeground(
+                    new java.awt.Color(15, 23, 42)
+            );
+
+            // Adds padding
+            txtReceipt.setMargin(
+                    new java.awt.Insets(20, 20, 20, 20)
+            );
+
+            // Creates scroll pane for receipt
+            javax.swing.JScrollPane scrollPane
+                    = new javax.swing.JScrollPane(
+                            txtReceipt
+                    );
+
+            // Receipt dialog size
+            scrollPane.setPreferredSize(
+                    new java.awt.Dimension(400, 500)
+            );
+
+            // Adds border
+            scrollPane.setBorder(
+                    javax.swing.BorderFactory.createLineBorder(
+                            new java.awt.Color(226, 232, 240)
+                    )
+            );
+
+            // Displays receipt dialog
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    scrollPane,
+                    "Digital Receipt",
+                    javax.swing.JOptionPane.PLAIN_MESSAGE
+            );
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error loading receipt details: " + e.getMessage(), "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading receipt details: "
+                    + e.getMessage(),
+                    "Database Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }//GEN-LAST:event_btnViewDetailsActionPerformed
 
     private void btnVoidSaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoidSaleActionPerformed
-        int selectedRow = tblTransactions.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblTransactions.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a transaction to void.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a transaction to void.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int transactionId = (int) tblTransactions.getValueAt(selectedRow, 0);
-        String currentStatus = (String) tblTransactions.getValueAt(selectedRow, 4); // Column 4 is Status
+        // Gets selected transaction ID
+        int transactionId
+                = (int) tblTransactions.getValueAt(
+                        selectedRow,
+                        0
+                );
 
+        // Gets current transaction status
+        String currentStatus
+                = (String) tblTransactions.getValueAt(
+                        selectedRow,
+                        4
+                );
+
+        // Validation:
+        // Checks if transaction is already voided
         if ("VOIDED".equalsIgnoreCase(currentStatus)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "This transaction has already been voided.", "Already Voided", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "This transaction has already been voided.",
+                    "Already Voided",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
+
             return;
         }
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to VOID Receipt #" + transactionId + "?\nThis will restore the items to inventory.",
-                "Confirm Void", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Confirmation dialog
+        int confirm
+                = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to VOID Receipt #"
+                        + transactionId
+                        + "?\nThis will restore the items to inventory.",
+                        "Confirm Void",
+                        javax.swing.JOptionPane.YES_NO_OPTION,
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
 
-        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+        // Stops process if user clicks NO
+        if (confirm
+                != javax.swing.JOptionPane.YES_OPTION) {
+
             return;
         }
 
         java.sql.Connection conn = null;
-        try {
-            conn = database.DBConnection.getConnection();
-            conn.setAutoCommit(false); 
 
-            String sqlVoid = "UPDATE Transactions SET status = 'VOIDED' WHERE transaction_id = ?";
-            try (java.sql.PreparedStatement pstmtVoid = conn.prepareStatement(sqlVoid)) {
+        try {
+
+            // Connects to database
+            conn = database.DBConnection.getConnection();
+
+            // Starts transaction mode
+            // All queries must succeed together
+            conn.setAutoCommit(false);
+
+            // ================= TRANSACTION VOID =================
+            // SQL query:
+            // Updates transaction status into VOIDED
+            String sqlVoid
+                    = "UPDATE Transactions "
+                    + "SET status = 'VOIDED' "
+                    + "WHERE transaction_id = ?";
+
+            try (
+                    // Creates PreparedStatement
+                    java.sql.PreparedStatement pstmtVoid
+                    = conn.prepareStatement(sqlVoid)) {
+
+                // Selects correct transaction
                 pstmtVoid.setInt(1, transactionId);
+
+                // Executes UPDATE query
                 pstmtVoid.executeUpdate();
             }
 
-            String sqlGetItems = "SELECT product_id, quantity FROM Transaction_Details WHERE transaction_id = ?";
-            String sqlRestore = "UPDATE Inventory SET current_stock = current_stock + ? WHERE product_id = ?";
-            
-            try (java.sql.PreparedStatement pstmtGetItems = conn.prepareStatement(sqlGetItems);
-                 java.sql.PreparedStatement pstmtRestore = conn.prepareStatement(sqlRestore)) {
-                 
-                pstmtGetItems.setInt(1, transactionId);
-                try (java.sql.ResultSet rsItems = pstmtGetItems.executeQuery()) {
-                    while (rsItems.next()) {
-                        int productId = rsItems.getInt("product_id");
-                        int qtyToReturn = rsItems.getInt("quantity");
+            // ================= INVENTORY RESTORE =================
+            // SQL query:
+            // Gets sold items from transaction
+            String sqlGetItems
+                    = "SELECT product_id, quantity "
+                    + "FROM Transaction_Details "
+                    + "WHERE transaction_id = ?";
 
+            // SQL query:
+            // Restores stock back into inventory
+            String sqlRestore
+                    = "UPDATE Inventory "
+                    + "SET current_stock = current_stock + ? "
+                    + "WHERE product_id = ?";
+
+            try (
+                    // Creates PreparedStatement
+                    java.sql.PreparedStatement pstmtGetItems
+                    = conn.prepareStatement(sqlGetItems); java.sql.PreparedStatement pstmtRestore
+                    = conn.prepareStatement(sqlRestore)) {
+
+                // Selects correct transaction
+                pstmtGetItems.setInt(1, transactionId);
+
+                try (
+                        // Executes SELECT query
+                        java.sql.ResultSet rsItems
+                        = pstmtGetItems.executeQuery()) {
+
+                    // Loops through sold items
+                    while (rsItems.next()) {
+
+                        // Gets product ID
+                        int productId
+                                = rsItems.getInt("product_id");
+
+                        // Gets sold quantity
+                        int qtyToReturn
+                                = rsItems.getInt("quantity");
+
+                        // Restores stock quantity
                         pstmtRestore.setInt(1, qtyToReturn);
+
+                        // Selects correct product
                         pstmtRestore.setInt(2, productId);
-                        pstmtRestore.addBatch(); 
+
+                        // Adds query into batch
+                        pstmtRestore.addBatch();
                     }
                 }
-                pstmtRestore.executeBatch(); 
+
+                // Executes all inventory updates together
+                pstmtRestore.executeBatch();
             }
 
-            String sqlLog = "{call sp_InsertAuditLog(?, ?, ?)}";
-            try (java.sql.CallableStatement cstmtLog = conn.prepareCall(sqlLog)) {
-                cstmtLog.setInt(1, LoginPanel.loggedInUserId); 
-                cstmtLog.setString(2, "VOID_SALE"); 
-                cstmtLog.setString(3, "Voided Transaction ID: " + transactionId + " and restored inventory.");
-                cstmtLog.execute(); 
+            // ================= AUDIT LOG =================
+            // SQL query:
+            // Calls stored procedure for audit logs
+            String sqlLog
+                    = "{call sp_InsertAuditLog(?, ?, ?)}";
+
+            try (
+                    // Creates CallableStatement
+                    java.sql.CallableStatement cstmtLog
+                    = conn.prepareCall(sqlLog)) {
+
+                // Inserts logged-in user ID
+                cstmtLog.setInt(
+                        1,
+                        LoginPanel.loggedInUserId
+                );
+
+                // Inserts action type
+                cstmtLog.setString(
+                        2,
+                        "VOID_SALE"
+                );
+
+                // Inserts audit description
+                cstmtLog.setString(
+                        3,
+                        "Voided Transaction ID: "
+                        + transactionId
+                        + " and restored inventory."
+                );
+
+                // Executes stored procedure
+                cstmtLog.execute();
             }
 
+            // Saves all database changes permanently
             conn.commit();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Transaction #" + transactionId + " successfully voided.\nInventory has been restored.", "Void Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // Success message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Transaction #"
+                    + transactionId
+                    + " successfully voided.\n"
+                    + "Inventory has been restored.",
+                    "Void Successful",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
 
+            // Reloads updated transaction records
             loadTransactions(txtSearchLogs.getText());
 
         } catch (Exception e) {
-            try { if (conn != null) conn.rollback(); } catch (Exception ex) {} 
+
+            try {
+
+                // Cancels all database changes if an error happens
+                if (conn != null) {
+
+                    conn.rollback();
+                }
+
+            } catch (Exception ex) {
+
+            }
+
+            // Prints error in console
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error voiding transaction: " + e.getMessage(), "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            // Shows database/system error
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Error voiding transaction: "
+                    + e.getMessage(),
+                    "Database Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
+
         } finally {
+
             if (conn != null) {
-                try { conn.setAutoCommit(true); } catch (Exception ex) {} 
-                try { conn.close(); } catch (Exception ex) {} 
+
+                try {
+
+                    // Turns auto-commit back on
+                    conn.setAutoCommit(true);
+
+                } catch (Exception ex) {
+
+                }
+
+                try {
+
+                    // Closes database connection
+                    conn.close();
+
+                } catch (Exception ex) {
+
+                }
             }
         }
     }//GEN-LAST:event_btnVoidSaleActionPerformed
 
     private void txtSearchLogsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchLogsActionPerformed
-        // TODO add your handling code here:
+        // Reloads transactions using search text
+        loadTransactions(txtSearchLogs.getText());
     }//GEN-LAST:event_txtSearchLogsActionPerformed
 
 

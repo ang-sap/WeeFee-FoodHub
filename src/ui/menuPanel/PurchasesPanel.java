@@ -1,66 +1,148 @@
 package ui.menuPanel;
 
+// Imports Swing constants for table alignment
 import javax.swing.SwingConstants;
+
+// Imports table cell renderer
 import javax.swing.table.DefaultTableCellRenderer;
+
+// Imports LoginPanel to get logged-in user ID
 import ui.auth.LoginPanel;
 
 public class PurchasesPanel extends javax.swing.JPanel {
 
+    // Constructor
+    // Runs when PurchasesPanel is created
     public PurchasesPanel() {
+
+        // Initializes all UI components
         initComponents();
 
+        // Styles the table header font
         tblPurchases.getTableHeader().setFont(
-                new java.awt.Font("Geist SemiBold", java.awt.Font.PLAIN, 10)
+                new java.awt.Font(
+                        "Geist SemiBold",
+                        java.awt.Font.PLAIN,
+                        10
+                )
         );
+
+        // Changes table header background color
         tblPurchases.getTableHeader().setBackground(
                 new java.awt.Color(245, 245, 245)
         );
+
+        // Changes table header text color
         tblPurchases.getTableHeader().setForeground(
                 new java.awt.Color(80, 80, 80)
         );
-        tblPurchases.setIntercellSpacing(new java.awt.Dimension(0, 0));
-        tblPurchases.setShowGrid(false);
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Removes spacing between table cells
+        tblPurchases.setIntercellSpacing(
+                new java.awt.Dimension(0, 0)
+        );
+
+        // Removes table grid lines
+        tblPurchases.setShowGrid(false);
+
+        // Creates center alignment renderer
+        DefaultTableCellRenderer centerRenderer
+                = new DefaultTableCellRenderer();
+
+        // Centers text horizontally
+        centerRenderer.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // Applies center alignment to all columns
         for (int i = 0; i < tblPurchases.getColumnCount(); i++) {
-            tblPurchases.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+            tblPurchases.getColumnModel()
+                    .getColumn(i)
+                    .setCellRenderer(centerRenderer);
         }
 
+        // Loads purchase records into table
         loadPurchases();
     }
 
+    // Loads purchase records from database
     public void loadPurchases() {
-        String sql = "SELECT p.purchase_id, p.purchase_date, s.supplier_name, "
-                + "(pd.quantity_bought * pd.cost_price) AS total_cost, p.status, prod.name AS product_name "
+
+        // SQL query:
+        // Gets purchase order information
+        String sql
+                = "SELECT p.purchase_id, "
+                + "p.purchase_date, "
+                + "s.supplier_name, "
+                + "(pd.quantity_bought * pd.cost_price) "
+                + "AS total_cost, "
+                + "p.status, "
+                + "prod.name AS product_name "
                 + "FROM Purchases p "
-                + "JOIN Suppliers s ON p.supplier_id = s.supplier_id "
-                + "JOIN Purchase_Details pd ON p.purchase_id = pd.purchase_id "
-                + "JOIN Products prod ON pd.product_id = prod.product_id "
+                + "JOIN Suppliers s "
+                + "ON p.supplier_id = s.supplier_id "
+                + "JOIN Purchase_Details pd "
+                + "ON p.purchase_id = pd.purchase_id "
+                + "JOIN Products prod "
+                + "ON pd.product_id = prod.product_id "
                 + "ORDER BY p.purchase_id DESC";
 
-        try (java.sql.Connection conn = database.DBConnection.getConnection(); java.sql.PreparedStatement pstmt = conn.prepareStatement(sql); java.sql.ResultSet rs = pstmt.executeQuery()) {
+        try (
 
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblPurchases.getModel();
+                // Connects to database
+                java.sql.Connection conn
+                = database.DBConnection.getConnection();
+
+                // Creates PreparedStatement
+                java.sql.PreparedStatement pstmt
+                = conn.prepareStatement(sql);
+
+                // Executes SELECT query
+                java.sql.ResultSet rs
+                = pstmt.executeQuery()
+        ) {
+
+            // Gets table model
+            javax.swing.table.DefaultTableModel model
+                    = (javax.swing.table.DefaultTableModel)
+                            tblPurchases.getModel();
+
+            // Clears existing rows
             model.setRowCount(0);
 
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy");
+            // Date format for purchase date
+            java.text.SimpleDateFormat sdf
+                    = new java.text.SimpleDateFormat(
+                            "MMM dd, yyyy"
+                    );
 
+            // Loops through purchase records
             while (rs.next()) {
+
+                // Adds row into table
                 model.addRow(new Object[]{
                     rs.getInt("purchase_id"),
-                    sdf.format(rs.getTimestamp("purchase_date")),
+
+                    // Formats purchase date
+                    sdf.format(
+                            rs.getTimestamp("purchase_date")
+                    ),
+
                     rs.getString("supplier_name"),
                     rs.getDouble("total_cost"),
                     rs.getString("status"),
                     rs.getString("product_name")
                 });
             }
+
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
         }
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -172,117 +254,347 @@ public class PurchasesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewPurchaseActionPerformed
-        java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+        // Gets current window
+        java.awt.Window parentWindow
+                = javax.swing.SwingUtilities
+                        .getWindowAncestor(this);
 
-        ui.dialogs.AddPurchaseDialog dialog = new ui.dialogs.AddPurchaseDialog(parentFrame, true);
+        // Converts window into Frame
+        java.awt.Frame parentFrame
+                = (parentWindow instanceof java.awt.Frame)
+                ? (java.awt.Frame) parentWindow
+                : null;
+
+        // Opens AddPurchaseDialog
+        ui.dialogs.AddPurchaseDialog dialog
+                = new ui.dialogs.AddPurchaseDialog(
+                        parentFrame,
+                        true
+                );
+
+        // Centers dialog relative to parent frame
         dialog.setLocationRelativeTo(parentFrame);
+
+        // Displays dialog
         dialog.setVisible(true);
 
+        // Reloads updated purchase records
         loadPurchases();
     }//GEN-LAST:event_btnNewPurchaseActionPerformed
 
     private void btnVoidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoidActionPerformed
-        int selectedRow = tblPurchases.getSelectedRow();
+        // Gets selected row from table
+        int selectedRow
+                = tblPurchases.getSelectedRow();
 
+        // Validation:
+        // Checks if user selected a row
         if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please select a purchase order to update.", "No Selection", javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a purchase order to update.",
+                    "No Selection",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
-        int purchaseId = (int) tblPurchases.getValueAt(selectedRow, 0);
-        String currentStatus = (String) tblPurchases.getValueAt(selectedRow, 4);
+        // Gets selected purchase ID
+        int purchaseId
+                = (int) tblPurchases.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-        boolean isCurrentlyPending = "Pending".equalsIgnoreCase(currentStatus);
+        // Gets current purchase status
+        String currentStatus
+                = (String) tblPurchases.getValueAt(
+                        selectedRow,
+                        4
+                );
 
-        String newStatus = isCurrentlyPending ? "Delivered" : "Pending";
-        String actionWord = isCurrentlyPending ? "mark as Delivered" : "revert to Pending";
-        String stockAction = isCurrentlyPending ? "add the items to" : "remove the items from";
-        String mathOperator = isCurrentlyPending ? "+" : "-"; // Decide whether to add or subtract
+        // Checks if current status is Pending
+        boolean isCurrentlyPending
+                = "Pending".equalsIgnoreCase(currentStatus);
 
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to " + actionWord + " Purchase #" + purchaseId + "?\nThis will " + stockAction + " the kitchen inventory.",
-                "Confirm Status Update", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Determines new status
+        String newStatus
+                = isCurrentlyPending
+                ? "Delivered"
+                : "Pending";
 
-        if (confirm != javax.swing.JOptionPane.YES_OPTION) {
+        // Determines action description
+        String actionWord
+                = isCurrentlyPending
+                ? "mark as Delivered"
+                : "revert to Pending";
+
+        // Determines stock action description
+        String stockAction
+                = isCurrentlyPending
+                ? "add the items to"
+                : "remove the items from";
+
+        // Determines math operator
+        // "+" adds stock
+        // "-" subtracts stock
+        String mathOperator
+                = isCurrentlyPending
+                ? "+"
+                : "-";
+
+        // Confirmation dialog
+        int confirm
+                = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to "
+                        + actionWord
+                        + " Purchase #"
+                        + purchaseId
+                        + "?\nThis will "
+                        + stockAction
+                        + " the kitchen inventory.",
+                        "Confirm Status Update",
+                        javax.swing.JOptionPane.YES_NO_OPTION,
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
+
+        // Stops process if user clicks NO
+        if (confirm
+                != javax.swing.JOptionPane.YES_OPTION) {
+
             return;
         }
 
         java.sql.Connection conn = null;
+
         try {
+
+            // Connects to database
             conn = database.DBConnection.getConnection();
+
+            // Starts transaction mode
+            // All queries must succeed together
             conn.setAutoCommit(false);
 
-            String sqlStatus = "UPDATE Purchases SET status = ? WHERE purchase_id = ?";
-            try (java.sql.PreparedStatement pstmtStatus = conn.prepareStatement(sqlStatus)) {
+            // ================= PURCHASE STATUS UPDATE =================
+
+            // SQL query:
+            // Updates purchase status
+            String sqlStatus
+                    = "UPDATE Purchases "
+                    + "SET status = ? "
+                    + "WHERE purchase_id = ?";
+
+            try (
+
+                    // Creates PreparedStatement
+                    java.sql.PreparedStatement pstmtStatus
+                    = conn.prepareStatement(sqlStatus)
+            ) {
+
+                // Updates purchase status
                 pstmtStatus.setString(1, newStatus);
+
+                // Selects correct purchase order
                 pstmtStatus.setInt(2, purchaseId);
+
+                // Executes UPDATE query
                 pstmtStatus.executeUpdate();
             }
 
-            String sqlGetItems = "SELECT product_id, quantity_bought FROM Purchase_Details WHERE purchase_id = ?";
-            String sqlInventory = "UPDATE Inventory SET current_stock = current_stock " + mathOperator + " ? WHERE product_id = ?";
+            // ================= INVENTORY UPDATE =================
 
-            try (java.sql.PreparedStatement pstmtGetItems = conn.prepareStatement(sqlGetItems); java.sql.PreparedStatement pstmtInv = conn.prepareStatement(sqlInventory)) {
+            // SQL query:
+            // Gets purchased items
+            String sqlGetItems
+                    = "SELECT product_id, quantity_bought "
+                    + "FROM Purchase_Details "
+                    + "WHERE purchase_id = ?";
 
+            // SQL query:
+            // Updates inventory stock
+            String sqlInventory
+                    = "UPDATE Inventory "
+                    + "SET current_stock = current_stock "
+                    + mathOperator
+                    + " ? "
+                    + "WHERE product_id = ?";
+
+            try (
+
+                    // Creates PreparedStatement
+                    java.sql.PreparedStatement pstmtGetItems
+                    = conn.prepareStatement(sqlGetItems);
+
+                    java.sql.PreparedStatement pstmtInv
+                    = conn.prepareStatement(sqlInventory)
+            ) {
+
+                // Selects correct purchase order
                 pstmtGetItems.setInt(1, purchaseId);
-                try (java.sql.ResultSet rsItems = pstmtGetItems.executeQuery()) {
-                    while (rsItems.next()) {
-                        int productId = rsItems.getInt("product_id");
-                        int qty = rsItems.getInt("quantity_bought");
 
+                try (
+
+                        // Executes SELECT query
+                        java.sql.ResultSet rsItems
+                        = pstmtGetItems.executeQuery()
+                ) {
+
+                    // Loops through purchased items
+                    while (rsItems.next()) {
+
+                        // Gets product ID
+                        int productId
+                                = rsItems.getInt("product_id");
+
+                        // Gets purchased quantity
+                        int qty
+                                = rsItems.getInt("quantity_bought");
+
+                        // Adds or subtracts stock
                         pstmtInv.setInt(1, qty);
+
+                        // Selects correct product
                         pstmtInv.setInt(2, productId);
+
+                        // Adds query into batch
                         pstmtInv.addBatch();
                     }
                 }
+
+                // Executes all inventory updates together
                 pstmtInv.executeBatch();
             }
 
-            String logDesc = isCurrentlyPending
-                    ? "Marked Purchase ID: " + purchaseId + " as Delivered and added stock."
-                    : "Reverted Purchase ID: " + purchaseId + " to Pending and removed stock.";
+            // ================= AUDIT LOG =================
 
-            String sqlLog = "INSERT INTO AuditLogs (user_id, action, description) VALUES (?, 'UPDATE_PURCHASE', ?)";
-            try (java.sql.PreparedStatement pstmtLog = conn.prepareStatement(sqlLog)) {
-                pstmtLog.setInt(1, LoginPanel.loggedInUserId);
+            // Creates audit description
+            String logDesc
+                    = isCurrentlyPending
+                    ? "Marked Purchase ID: "
+                    + purchaseId
+                    + " as Delivered and added stock."
+
+                    : "Reverted Purchase ID: "
+                    + purchaseId
+                    + " to Pending and removed stock.";
+
+            // SQL query:
+            // Inserts audit log record
+            String sqlLog
+                    = "INSERT INTO AuditLogs "
+                    + "(user_id, action, description) "
+                    + "VALUES (?, 'UPDATE_PURCHASE', ?)";
+
+            try (
+
+                    // Creates PreparedStatement
+                    java.sql.PreparedStatement pstmtLog
+                    = conn.prepareStatement(sqlLog)
+            ) {
+
+                // Inserts logged-in user ID
+                pstmtLog.setInt(
+                        1,
+                        LoginPanel.loggedInUserId
+                );
+
+                // Inserts audit description
                 pstmtLog.setString(2, logDesc);
+
+                // Executes INSERT query
                 pstmtLog.executeUpdate();
             }
 
+            // Saves all database changes permanently
             conn.commit();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Purchase #" + purchaseId + " successfully updated to " + newStatus + ".", "Status Updated", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // Success message
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Purchase #"
+                    + purchaseId
+                    + " successfully updated to "
+                    + newStatus
+                    + ".",
+                    "Status Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+            );
 
+            // Reloads updated purchase records
             loadPurchases();
 
         } catch (Exception e) {
+
             try {
+
+                // Cancels all database changes if an error happens
                 if (conn != null) {
+
                     conn.rollback();
                 }
+
             } catch (Exception ex) {
+
             }
 
+            // Gets error message
             String errorMsg = e.getMessage();
-            if (errorMsg != null && errorMsg.contains("constraint") && errorMsg.contains("current_stock")) {
-                javax.swing.JOptionPane.showMessageDialog(this,
-                        "Update Failed: Items Already Sold!\n\nYou cannot revert this purchase to Pending because the kitchen has already sold some of these items. Reverting it would cause negative stock.",
+
+            // Handles stock constraint errors
+            if (errorMsg != null
+                    && errorMsg.contains("constraint")
+                    && errorMsg.contains("current_stock")) {
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Update Failed: Items Already Sold!\n\n"
+                        + "You cannot revert this purchase to Pending "
+                        + "because the kitchen has already sold "
+                        + "some of these items. "
+                        + "Reverting it would cause negative stock.",
                         "Inventory Protection",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
+
             } else {
+
+                // Prints error in console
                 e.printStackTrace();
-                javax.swing.JOptionPane.showMessageDialog(this, "Error updating purchase: " + errorMsg, "Database Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+                // Shows database/system error
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "Error updating purchase: "
+                        + errorMsg,
+                        "Database Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
             }
+
         } finally {
+
             if (conn != null) {
+
                 try {
+
+                    // Turns auto-commit back on
                     conn.setAutoCommit(true);
+
                 } catch (Exception ex) {
+
                 }
+
                 try {
+
+                    // Closes database connection
                     conn.close();
+
                 } catch (Exception ex) {
+
                 }
             }
         }

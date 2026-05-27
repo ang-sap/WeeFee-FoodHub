@@ -1,31 +1,65 @@
 package ui.dialogs;
 
+// Imports database connection class
+import database.DBConnection;
+
+// Imports SQL classes
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
+// Imports JOptionPane for popup messages
 import javax.swing.JOptionPane;
-import database.DBConnection;
 
 public class EditProductDialog extends javax.swing.JDialog {
 
+    // Stores the selected product ID
     private int productId;
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EditProductDialog.class.getName());
 
+    // Logger used for debugging or tracking errors
+    private static final java.util.logging.Logger logger
+            = java.util.logging.Logger.getLogger(
+                    EditProductDialog.class.getName()
+            );
+
+    // Default constructor
     public EditProductDialog(java.awt.Frame parent, boolean modal) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
     }
 
-    public EditProductDialog(java.awt.Frame parent, boolean modal, int id, String name, String categoryName, double price) {
+    // Constructor used when editing a product
+    public EditProductDialog(
+            java.awt.Frame parent,
+            boolean modal,
+            int id,
+            String name,
+            String categoryName,
+            double price
+    ) {
+
+        // Calls parent constructor
         super(parent, modal);
+
+        // Initializes all UI components
         initComponents();
 
+        // Stores selected product ID
         this.productId = id;
 
+        // Displays existing product name
         txtProductName.setText(name);
+
+        // Displays existing price
         txtPrice.setText(String.valueOf(price));
 
+        // Selects the correct category in combo box
         cbCategory.setSelectedItem(categoryName.trim());
 
+        // Changes button text
         btnSave.setText("Update Product");
     }
 
@@ -163,53 +197,116 @@ public class EditProductDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_txtPriceActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // Closes dialog
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        String name = txtProductName.getText().trim();
-        String category = cbCategory.getSelectedItem().toString();
-        String priceText = txtPrice.getText().trim();
+        // Gets updated product name
+        String name
+                = txtProductName.getText().trim();
 
+        // Gets selected category
+        String category
+                = cbCategory.getSelectedItem().toString();
+
+        // Gets updated price
+        String priceText
+                = txtPrice.getText().trim();
+
+        // Validation:
+        // Checks if fields are empty
         if (name.isEmpty() || priceText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields before saving.", "Missing Data", JOptionPane.WARNING_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please fill in all fields before saving.",
+                    "Missing Data",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
             return;
         }
 
         try {
-            double price = Double.parseDouble(priceText);
+
+            // Converts price text into double value
+            double price
+                    = Double.parseDouble(priceText);
+
+            // Validation:
+            // Price must be greater than 0
             if (price <= 0) {
+
                 JOptionPane.showMessageDialog(
                         this,
                         "Product price must be greater than 0!",
                         "Invalid Price",
                         JOptionPane.WARNING_MESSAGE
                 );
+
                 return;
             }
 
-            int categoryId = cbCategory.getSelectedIndex() + 1;
+            // Gets category ID based on combo box index
+            // +1 because database IDs start at 1
+            int categoryId
+                    = cbCategory.getSelectedIndex() + 1;
 
-            Connection conn = DBConnection.getConnection();
+            // Connects to database
+            Connection conn
+                    = DBConnection.getConnection();
 
-            String sql = "UPDATE Products SET name = ?, category_id = ?, price = ? WHERE product_id = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            // SQL query for updating product
+            String sql
+                    = "UPDATE Products "
+                    + "SET name = ?, category_id = ?, price = ? "
+                    + "WHERE product_id = ?";
 
+            // Creates PreparedStatement
+            PreparedStatement pstmt
+                    = conn.prepareStatement(sql);
+
+            // Updates product name
             pstmt.setString(1, name);
+
+            // Updates category ID
             pstmt.setInt(2, categoryId);
+
+            // Updates price
             pstmt.setDouble(3, price);
+
+            // Selects correct product using product ID
             pstmt.setInt(4, productId);
 
+            // Executes UPDATE query
             pstmt.executeUpdate();
 
-            JOptionPane.showMessageDialog(this, "Product Updated Successfully!");
+            // Success message
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Product Updated Successfully!"
+            );
+
+            // Closes dialog
             this.dispose();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Price must be a valid number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+
+            // Runs if price is not numeric
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Price must be a valid number!",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
 
         } catch (Exception e) {
+
+            // Prints error in console
             e.printStackTrace();
+
+            // Shows database/system error
             JOptionPane.showMessageDialog(
                     this,
                     "Unable to save product. Please check your input values.",
@@ -223,34 +320,34 @@ public class EditProductDialog extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the dialog */
+        // Opens dialog safely in Event Dispatch Thread
         java.awt.EventQueue.invokeLater(new Runnable() {
+
             @Override
             public void run() {
-                EditProductDialog dialog = new EditProductDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+
+                // Creates dialog window
+                EditProductDialog dialog
+                        = new EditProductDialog(
+                                new javax.swing.JFrame(),
+                                true
+                        );
+
+                // Closes application when dialog closes
+                dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
+
                     @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
+                    public void windowClosing(
+                            java.awt.event.WindowEvent e) {
+
                         System.exit(0);
                     }
-                });
+                }
+                );
+
+                // Displays dialog
                 dialog.setVisible(true);
             }
         });
