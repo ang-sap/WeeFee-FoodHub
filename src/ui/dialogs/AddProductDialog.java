@@ -298,16 +298,32 @@ public class AddProductDialog extends javax.swing.JDialog {
 
         } catch (Exception e) {
 
-            // Prints error in console
+            // 1. Prints the raw SQL error in the console for you (the developer)
             e.printStackTrace();
 
-            // Shows database/system error
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Unable to save product. Please check your input values.",
-                    "Database Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            // 2. Gets the SQL error text secretly
+            String errorMsg = e.getMessage().toLowerCase();
+
+            // 3. Checks if the SQL error is complaining about a duplicate
+            if (errorMsg != null && (errorMsg.contains("unique") || errorMsg.contains("duplicate") || errorMsg.contains("primary key"))) {
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "This record already exists! You cannot add a duplicate.",
+                        "Duplicate Found",
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
+
+            } else {
+
+                // 4. For all other random database errors (like server disconnects)
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "A system error occurred while trying to save. Please try again.",
+                        "System Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
+            }
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 

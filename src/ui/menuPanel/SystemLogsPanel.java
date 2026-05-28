@@ -187,8 +187,9 @@ public class SystemLogsPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading system logs: "
-                    + e.getMessage()
+                    "Unable to fetch system logs. Please contact the administrator.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }

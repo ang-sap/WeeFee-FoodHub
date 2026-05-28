@@ -126,15 +126,15 @@ public class ExpensesPanel extends javax.swing.JPanel {
             }
 
         } catch (Exception e) {
-
-            // Prints error in console
+            // Prints error in console for developers
             e.printStackTrace();
 
-            // Shows database/system error
+            // Shows safe error to user
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading expenses: "
-                    + e.getMessage()
+                    "Unable to load expenses at this time. Please check your connection and try again.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -403,16 +403,14 @@ public class ExpensesPanel extends javax.swing.JPanel {
                 loadExpenses();
 
             } catch (Exception e) {
-
-                // Prints error in console
+                // Prints error in console for developers
                 e.printStackTrace();
 
-                // Shows database/system error
+                // Shows safe error to user
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
-                        "Database Error: "
-                        + e.getMessage(),
-                        "Error",
+                        "An error occurred while trying to void this expense. Please contact the administrator.",
+                        "System Error",
                         javax.swing.JOptionPane.ERROR_MESSAGE
                 );
             }

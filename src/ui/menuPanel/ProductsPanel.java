@@ -165,6 +165,13 @@ public class ProductsPanel extends javax.swing.JPanel {
 
             // Prints error in console
             e.printStackTrace();
+            
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load the products list. Please try again.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -484,8 +491,9 @@ public class ProductsPanel extends javax.swing.JPanel {
                 // Shows database/system error
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
-                        "Error processing request: "
-                        + e.getMessage()
+                        "An error occurred while processing your request. Please try again.",
+                        "System Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
                 );
             }
         }

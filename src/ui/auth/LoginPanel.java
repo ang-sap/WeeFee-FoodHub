@@ -340,7 +340,9 @@ public class LoginPanel extends javax.swing.JPanel {
             // Shows database error message
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Database Error: " + e.getMessage()
+                    "A system error occurred during login. Please check your connection or contact the administrator.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }//GEN-LAST:event_loginBtnActionPerformed

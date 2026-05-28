@@ -181,14 +181,15 @@ public class HomePanel extends javax.swing.JPanel {
             }
 
         } catch (Exception e) {
-
-            // Prints error in console
+            // Prints error in console for developers
             e.printStackTrace();
 
-            // Displays dashboard loading error
-            System.out.println(
-                    "Dashboard Load Error: "
-                    + e.getMessage()
+            // Notify the user that the dashboard failed to load
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load dashboard data. Please try refreshing or contact support.",
+                    "Dashboard Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }

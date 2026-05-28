@@ -302,8 +302,8 @@ public class AddExpenseDialog extends javax.swing.JDialog {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Database Error: " + e.getMessage(),
-                    "Error",
+                    "An error occurred while saving the expense. Please try again.",
+                    "System Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }

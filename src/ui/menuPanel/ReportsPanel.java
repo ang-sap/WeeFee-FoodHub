@@ -655,9 +655,8 @@ public class ReportsPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error generating report: "
-                    + e.getMessage(),
-                    "Database Error",
+                    "A database error occurred while generating the report. Please contact the administrator.",
+                    "System Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
@@ -780,8 +779,7 @@ public class ReportsPanel extends javax.swing.JPanel {
                 // Shows export error
                 JOptionPane.showMessageDialog(
                         this,
-                        "Error exporting file: "
-                        + e.getMessage(),
+                        "An error occurred while trying to export the report. Ensure the file is not open elsewhere and try again.",
                         "Export Error",
                         JOptionPane.ERROR_MESSAGE
                 );

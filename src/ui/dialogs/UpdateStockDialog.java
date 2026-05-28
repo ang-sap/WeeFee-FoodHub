@@ -273,8 +273,8 @@ public class UpdateStockDialog extends javax.swing.JDialog {
             // Shows database/system error
             JOptionPane.showMessageDialog(
                     this,
-                    "Database Error: " + e.getMessage(),
-                    "Error",
+                    "An error occurred while updating the stock. Please try again.",
+                    "System Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }

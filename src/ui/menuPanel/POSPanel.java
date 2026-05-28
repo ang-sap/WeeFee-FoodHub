@@ -1485,14 +1485,14 @@ public class POSPanel extends javax.swing.JPanel {
 
             } else {
 
-                // Prints error in console
+                // Prints technical error in console for developers
                 e.printStackTrace();
 
-                // Shows database/system error
+                // Shows a safe, user-friendly error to the cashier
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
-                        "Checkout Failed: " + errorMsg,
-                        "Database Error",
+                        "A system error occurred during checkout. Please try again or contact the administrator.",
+                        "System Error",
                         javax.swing.JOptionPane.ERROR_MESSAGE
                 );
             }

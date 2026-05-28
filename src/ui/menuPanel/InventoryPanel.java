@@ -138,8 +138,9 @@ public class InventoryPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading inventory: "
-                    + e.getMessage()
+                    "Unable to load inventory data. Please try again later.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -463,8 +464,7 @@ public class InventoryPanel extends javax.swing.JPanel {
                 // Shows export error
                 JOptionPane.showMessageDialog(
                         this,
-                        "Error exporting file: "
-                        + e.getMessage(),
+                        "An error occurred while trying to export the file. Ensure the file is not open in another program and try again.",
                         "Export Error",
                         JOptionPane.ERROR_MESSAGE
                 );

@@ -141,8 +141,9 @@ public class SuppliersPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading suppliers: "
-                    + e.getMessage()
+                    "Unable to load suppliers. Please try again later.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -530,8 +531,9 @@ public class SuppliersPanel extends javax.swing.JPanel {
                 // Shows database/system error
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
-                        "Error processing request: "
-                        + e.getMessage()
+                        "An error occurred while updating the supplier record. Please try again.",
+                        "System Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
                 );
             }
         }

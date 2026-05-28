@@ -178,8 +178,9 @@ public class TransactionsPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading transactions: "
-                    + e.getMessage()
+                    "Unable to load transaction history. Please try again.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -631,9 +632,8 @@ public class TransactionsPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error loading receipt details: "
-                    + e.getMessage(),
-                    "Database Error",
+                    "Unable to retrieve receipt details for this transaction.",
+                    "System Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE
             );
         }
@@ -863,9 +863,8 @@ public class TransactionsPanel extends javax.swing.JPanel {
             // Shows database/system error
             javax.swing.JOptionPane.showMessageDialog(
                     this,
-                    "Error voiding transaction: "
-                    + e.getMessage(),
-                    "Database Error",
+                    "A critical error occurred while trying to void the transaction. Please contact support.",
+                    "System Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE
             );
 

@@ -140,6 +140,13 @@ public class PurchasesPanel extends javax.swing.JPanel {
 
             // Prints error in console
             e.printStackTrace();
+            
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load purchase orders. Please try again.",
+                    "System Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -552,10 +559,7 @@ public class PurchasesPanel extends javax.swing.JPanel {
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
                         "Update Failed: Items Already Sold!\n\n"
-                        + "You cannot revert this purchase to Pending "
-                        + "because the kitchen has already sold "
-                        + "some of these items. "
-                        + "Reverting it would cause negative stock.",
+                        + "You cannot revert this purchase to Pending because the kitchen has already sold some of these items.",
                         "Inventory Protection",
                         javax.swing.JOptionPane.ERROR_MESSAGE
                 );
@@ -568,9 +572,8 @@ public class PurchasesPanel extends javax.swing.JPanel {
                 // Shows database/system error
                 javax.swing.JOptionPane.showMessageDialog(
                         this,
-                        "Error updating purchase: "
-                        + errorMsg,
-                        "Database Error",
+                        "An error occurred while updating the purchase order. Please try again.",
+                        "System Error",
                         javax.swing.JOptionPane.ERROR_MESSAGE
                 );
             }

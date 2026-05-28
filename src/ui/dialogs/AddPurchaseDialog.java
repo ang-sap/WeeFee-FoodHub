@@ -78,6 +78,14 @@ public class AddPurchaseDialog extends javax.swing.JDialog {
 
             // Prints error in console
             e.printStackTrace();
+            
+            // Warns the user that dropdowns failed to populate
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load suppliers and products. Please check your connection and reopen this window.",
+                    "System Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
